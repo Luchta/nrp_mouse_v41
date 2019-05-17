@@ -78,6 +78,12 @@ double hla2=110;
 double hra1=70; 
 double hra2=90;
 
+//global variables for spine bending
+int scentre = 90;
+int sleft = 50;
+int sright = 130;
+int sdifference = sright - sleft;
+
 //******************************************************************************************************************************************************************************************
 //Gait patterns and variables
 /*
@@ -214,20 +220,21 @@ int getch()
 
 void left(double t)
 {	
-	double sv =0; //spine value
+
+        double sv =0; //spine value
 	//just changing the spine movement now
 	//(extreme left, extreme right, difference)=(20, 160, 140)
-	double svadd=(140/(arrsize/2));
+        double svadd=(sdifference/(arrsize/2));
 	sv=0;
 	for (int f=0; f<(arrsize/2); f++, sv=sv+svadd)
 	{	//spine actuates from 90 to 160
-		NRPMouseservoarray[f][9]=90+sv;
+                NRPMouseservoarray[f][9]=scentre+sv;
 	}
 	sv=0;
 	for (int f=(arrsize/2); f<=arrsize; f++, sv=sv+svadd)
 	{	
 		//spine actuates from 160 to 90
-		NRPMouseservoarray[f][9]=160-sv; 
+                NRPMouseservoarray[f][9]=sright-sv;
 	}
 }
 void right(double t)
@@ -235,17 +242,17 @@ void right(double t)
 	double sv =0; //spine value
 	//just changing the spine movement now
 	//(extreme left, extreme right, difference)=(20, 160, 140)
-	double svadd=(140/(arrsize/2));
+        double svadd=(sdifference/(arrsize/2));
 	sv=0;
 	for (int f=0; f<(arrsize/2); f++, sv=sv+svadd)
 	{	//spine actuates from 90 to 160
-		NRPMouseservoarray[f][9]=20+sv;
+                NRPMouseservoarray[f][9]=sleft+sv;
 	}
 	sv=0;
 	for (int f=(arrsize/2); f<=arrsize; f++, sv=sv+svadd)
 	{	
 		//spine actuates from 160 to 90
-		NRPMouseservoarray[f][9]=90-sv; 
+                NRPMouseservoarray[f][9]=scentre-sv;
 	}
 }
 
@@ -446,17 +453,21 @@ void trot(double t)
 	
 	//this part is for the spine movement
 	//(extreme left, extreme right, difference, center)=(50 c, 130 inverted c, 80, 90)
+        int STright = 120;
+        int STleft = 60;
+        int STdiff = STright - STleft;
+
 	sv=0;
-	svadd_trot=(80/(arrsize/2));
+        svadd_trot=(STdiff/(arrsize/2)); //calculate step size for movement
 	for (int f=0; f<(arrsize/2); f++, sv=sv+svadd_trot)
 	{	//spine actuates from 50 to 130
-		NRPMouseservoarray[f][9]=50+sv;
+                NRPMouseservoarray[f][9]=STleft+sv; //move by one stepsize for halt the motion array
 	}
 	sv=0;
 	for (int f=(arrsize/2); f<=arrsize; f++, sv=sv+svadd_trot)
 	{	
 		//spine actuates from 130 to 50
-		NRPMouseservoarray[f][9]=130-sv; 
+                NRPMouseservoarray[f][9]=STright-sv;
 	}
 	
 	//this part is for the tail movement
