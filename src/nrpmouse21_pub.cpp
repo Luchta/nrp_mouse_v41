@@ -79,9 +79,9 @@ double hra1=70;
 double hra2=90;
 
 //global variables for spine bending
-int scentre = 90;
-int sleft = 50;
-int sright = 130;
+int scentre = 98;
+int sleft = 58;
+int sright = 138;
 int sdifference = sright - sleft;
 
 //******************************************************************************************************************************************************************************************
@@ -453,8 +453,8 @@ void trot(double t)
 	
 	//this part is for the spine movement
 	//(extreme left, extreme right, difference, center)=(50 c, 130 inverted c, 80, 90)
-        int STright = 120;
-        int STleft = 60;
+        int STright = 108;
+        int STleft = 88;
         int STdiff = STright - STleft;
 
 	sv=0;

@@ -57,7 +57,7 @@ def messageCb(msgarr):
 	kit.servo[1].angle = clamp(msgarr.data[6]) #hla2
 	kit.servo[2].angle = clamp(msgarr.data[7]) #hra1
 	kit.servo[3].angle = clamp(msgarr.data[8]) #hra2
-#	kit.servo[4].angle = clamp(msgarr.data[9]) #spine
+	kit.servo[4].angle = clamp(msgarr.data[9]) #spine
 	kit.servo[5].angle = clamp(msgarr.data[10]) #tail
 	kit.servo[8].angle = ( clamp(msgarr.data[3])) #fla1
 	kit.servo[9].angle = ( clamp(msgarr.data[4])) #fla2
