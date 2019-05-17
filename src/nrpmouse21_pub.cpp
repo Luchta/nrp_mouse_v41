@@ -118,8 +118,8 @@ double phaseoffset=0.6;
 //*****************************************************************************************************************************************************************************************
 //global array, this is the one that will be read by the publisher
 
-double stridetime=0.1;	//time taken for leg to move in 1 cycle.Servo can move 1 degree in 2ms, at the moment this is 0.2 due to the bluetooth module issue
-double streamfreq=50; 	//how many set of values are published to the teensy per second. (maximum of 500 values per second)
+double stridetime=0.2;	//time taken for leg to move in 1 cycle.Servo can move 1 degree in 2ms, at the moment this is 0.2 due to the bluetooth module issue
+double streamfreq=500; 	//how many set of values are published to the teensy per second. (maximum of 500 values per second)
 int arrsize=stridetime*streamfreq; 		//error shown if its declared as NRPMouseservoarray[arrsize][9]. 
 double NRPMouseservoarray[100][11]; 	//size of array needs to be input manually
 double NRPMouseservoarraytemp[100][11]; //temporary sotred for phase difference computation
