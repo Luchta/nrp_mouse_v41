@@ -228,11 +228,13 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     //TODO
     int dir;
 
+    tmpSpine = Spine.centre();
     //Spine positions
     switch (dir){
-    case Fwd:
-    case stop:
     case Bkwd:
+    case stop:
+    case stance:
+    case Fwd:
         tmpSpine = Spine.centre();
         break;
     case left:
@@ -309,6 +311,7 @@ void CMouseCtrl::TrotBkw(int motionlength) //calculates trott gait moving backwa
     //TODO
     int dir;
 
+    tmpSpine = Spine.centre();
     //Spine positions
     switch (dir){
     case Fwd:
