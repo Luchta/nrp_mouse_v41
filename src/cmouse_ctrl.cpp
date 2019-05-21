@@ -49,71 +49,61 @@ void CMouseRos::RosCtrl()
     int motionlength = 50;
     int cmd = '0';
     int state = '0';
-    bool newArray = true;
+    //bool newArray = true;
     clearArr(); //set everything to 90 deg, to avoid damage.
 
     while (ros::ok())
     {
         cmd = messages; //just one access to messages per run - not yet atomic!!
         if (cmd != state && cmd != 0){
-            newArray = true;
+            //newArray = true;
             state = cmd;
         }
         switch (state) {
-        case 'i':
+        case 'i':   //initalize pose
             dir = stop;
             std::cout << "init" << std::endl;
-            newArray = false;
             messages = 0;
-            Init();
-            Publish();
+            Init(3);
+            Publish(3);
             state = 'h';
             break;
-        case 'w':
-            if (newArray){
-                dir = Fwd;
-                std::cout << "Straight ahead" << std::endl;
-                Trot(motionlength);
-                newArray = false;
-                messages = 0;
-            }
-            Publish(motionlength);
+        case 'w': //walk forward
+            dir = Fwd;
+            std::cout << "Straight ahead" << std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
             break;
-        case 'a':
-            if (newArray){
-                dir = left;
-                std::cout<<"Left Turn"<<std::endl;
-                Trot(motionlength);
-                newArray = false;
-                messages = 0;
-            }
-            Publish(motionlength);
+        case 's': //walk backward
+            dir = Bkwd;
+            std::cout<<"Backwards"<<std::endl;
+            TrotBkw(motionlength);
+            messages = 0;
+            state = 'm';
             break;
-        case 's':
-            if (newArray){
-                dir = Bkwd;
-                std::cout<<"Backwards"<<std::endl;
-                TrotBkw(motionlength);
-                newArray = false;
-                messages = 0;
-            }
-            Publish(motionlength);
+        case 'a': //walk left
+            dir = left;
+            std::cout<<"Left Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
             break;
-        case 'd':
-            if (newArray){
-                dir = right;
-                std::cout<<"Right Turn"<<std::endl;
-                Trot(motionlength);
-                newArray = false;
-                messages = 0;
-            }
-            Publish(motionlength);
+        case 'd':   //walk right
+            dir = right;
+            std::cout<<"Right Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
             break;
-        case 'q':
+        case 'q':   //quit programm
             std::cout<<"Quitting"<<std::endl;
             messages = '.';
             return;
-        case 'h':
+        case 'm':   //publish motions to ros
+            Publish(motionlength);
+            break;
+        case 'h':   //idle
             usleep(90);
 
             break;
@@ -183,7 +173,7 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
     CLegPos tmpLeg;
     CSpinePos tmpSpine;
 
-	clearArr();
+    clearArr();
 
     //Spine positions
     tmpSpine = Spine.centre();
@@ -211,9 +201,10 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
         tmpLeg = LForeRight.GetNext();
         TrottArray[i][FORERIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][FORERIGHT_KNEE] = tmpLeg.coil;
+
         TrottArray[i][SPINE] = tmpSpine.spine;
         TrottArray[i][TAIL] = tmpSpine.tail;
-	TrottArray[i][SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][SPINE_FLEX] = Spine.crouch();
     }
 
 }
@@ -506,7 +497,7 @@ void CMouseCtrl::clearArr(){    //clear the TrottArray
         TrottArray[i][HINDRIGHT_KNEE] = 90 ;
         TrottArray[i][SPINE] = 90 ;
         TrottArray[i][TAIL] = 90 ;
-        TrottArray[i][SPINE_FLEX] = 90 ;
+        TrottArray[i][SPINE_FLEX] = 180 ;
         TrottArray[i][HEAD_PAN] = 90 ;
         TrottArray[i][HEAD_TILT] = 90 ;
     }
