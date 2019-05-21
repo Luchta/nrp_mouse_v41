@@ -98,6 +98,8 @@ void CMouseRos::RosCtrl()
             break;
         case 'q':   //quit programm
             std::cout<<"Quitting"<<std::endl;
+            clearArr();
+            Publish();
             messages = '.';
             return;
         case 'm':   //publish motions to ros
@@ -204,7 +206,7 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
 
         TrottArray[i][SPINE] = tmpSpine.spine;
         TrottArray[i][TAIL] = tmpSpine.tail;
-        TrottArray[i][SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][SPINE_FLEX] = 180;
     }
 
 }
@@ -216,8 +218,6 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     int i;
     CLegPos tmp;
     CSpinePos tmpSpine;
-    //TODO
-    int dir;
 
     tmpSpine = Spine.centre();
     //Spine positions
@@ -299,14 +299,13 @@ void CMouseCtrl::TrotBkw(int motionlength) //calculates trott gait moving backwa
     int i;
     CLegPos tmp;
     CSpinePos tmpSpine;
-    //TODO
-    int dir;
 
     tmpSpine = Spine.centre();
     //Spine positions
     switch (dir){
     case Fwd:
     case stop:
+    case stance:
     case Bkwd:
         tmpSpine = Spine.centre();
         break;
@@ -510,6 +509,8 @@ void CMouseCtrl::startThread() { //starting the loop thread
     t1.detach();
     std::cout << "Walker thread detached"<<std::endl;
 }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // leg machine methods
