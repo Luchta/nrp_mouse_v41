@@ -131,7 +131,9 @@ void CMouseRos::Publish(int length)
         msgarr.data[TAIL]=(TrottArray[i][TAIL]);
         msgarr.data[SPINE_FLEX]=(TrottArray[i][SPINE_FLEX]);
         msgarr.data[HEAD_PAN]=(TrottArray[i][HEAD_PAN]);
-        msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+	msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+
+	//std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
 
         pub.publish(msgarr);
         ros::spinOnce();
@@ -647,7 +649,7 @@ CSpinePos CSpine::moveRight(int length)
 //every call to this funtion gives the next hihger bending iteration until the maximum bending is reached.
 CSpinePos CSpine::moveStepLeft(int length)
 {
-    if ((curSP += spineStep) < posFarLeft){
+    if ((curSP -= spineStep) < posFarLeft){
         curSP = posFarLeft;
     }
     return CSpinePos(curSP, curTL);

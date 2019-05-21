@@ -29,6 +29,7 @@ kit.servo[0].actuation_range = 180
 
 
 #numbering
+#0 timestamp
 #1 fla1	(Foreleft Shoulder servo)    	SB: 8
 #2 fla2 (Foreleft Elbow servo)  	SB: 9
 #3 fra1	(Foreright Shoulder servo)   	SB: 10
@@ -39,9 +40,9 @@ kit.servo[0].actuation_range = 180
 #8 hra2	(Hindright knee servo)  	SB: 3
 #9 spine                           	SB: 4
 #10 tail                            	SB: 5
-#Spine2   (up/down)              	SB: 7
-#Head    (left/right)            	SB: 12
-#Head    (up/down)               	SB: 13
+#11 Spine2   (up/down)              	SB: 7
+#12 Head    (left/right)            	SB: 12
+#13 Head    (up/down)               	SB: 13
 
 def clamp(n):
 	n = abs(round(n))
@@ -64,6 +65,7 @@ def messageCb(msgarr):
 	kit.servo[10].angle = clamp(msgarr.data[1]) #fra1
 	kit.servo[11].angle = clamp(msgarr.data[2]) #fra2
 	kit.servo[7].angle = clamp(msgarr.data[11]) #spine2
+#	print(clamp(msgarr.data[11]))
 #	kit.servo[12].angle = clamp(msgarr.data[2]) #Head LR
 #	kit.servo[13].angle = clamp(msgarr.data[3]) #HEAD UD
 
