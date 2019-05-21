@@ -183,6 +183,8 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
     CLegPos tmpLeg;
     CSpinePos tmpSpine;
 
+	clearArr();
+
     //Spine positions
     tmpSpine = Spine.centre();
 
@@ -211,7 +213,7 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
         TrottArray[i][FORERIGHT_KNEE] = tmpLeg.coil;
         TrottArray[i][SPINE] = tmpSpine.spine;
         TrottArray[i][TAIL] = tmpSpine.tail;
-
+	TrottArray[i][SPINE_FLEX] = Spine.crouch();
     }
 
 }
