@@ -15,8 +15,13 @@ int main(int argc, char **argv)
     std::cout << "Hello World!" << std::endl;
 
     CMouseRos Mouse = CMouseRos();
+    //CMouseCtrl Mouse = CMouseCtrl();
+    CMouseUI UI = CMouseUI(Mouse.messages);
 
-    Mouse.RosCtrl();
+    Mouse.ROSstartThread();
+
+    UI.process();
+    //Mouse.RosCtrl();
 
     ros::spin();
 

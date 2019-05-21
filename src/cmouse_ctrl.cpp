@@ -36,17 +36,26 @@ CMouseRos::CMouseRos()
     //ros::Rate loop_rate(10); //run at 10Hz, not sleep time
 }
 
+//starting the loop thread
+void CMouseRos::ROSstartThread() {
+    std::cout << "starting UART and MOUSE thread"<<std::endl;
+    std::thread t1 ([=] { RosCtrl(); });
+    t1.detach();
+    std::cout << "Walker thread detached"<<std::endl;
+}
+
 void CMouseRos::RosCtrl()
 {
     int motionlength = 50;
-    char dir = '0';
+    int dir = '0';
     char state = '0';
     clearArr(); //set everything to 90 deg, to avoid damage.
 
     //while(ros.OK)
     while (ros::ok())
     {
-        dir = getch();
+        //dir = getch();
+        dir = messages;
         if (dir != -1){
             state = dir;
         }
@@ -108,6 +117,31 @@ void CMouseRos::Publish(int length)
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UI methods
+
+void CMouseUI::process()
+{
+
+    do {
+    _msg = getch();
+    usleep(100);
+    }while (_msg != '.');
+}
+
+int CMouseUI::getch()
+{
+    //a non locking getchar() which will always wait for input
+    static struct termios oldt, newt;
+    tcgetattr( STDIN_FILENO, &oldt);           // save old settings
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);                 // disable buffering
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
+    int dir = getchar();  // read character (non-blocking)
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
+    return dir;
+
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CMouseCtrl Methods
@@ -222,6 +256,7 @@ void CMouseCtrl::Ctrl()
 {
     int motionlength = 50;
     char dir = '0';
+    int state = '0';
     bool OK = true;
 
     clearArr(); //set everything to 90 deg, to avoid damage.
@@ -229,8 +264,11 @@ void CMouseCtrl::Ctrl()
     //while(ros.OK)
     while (OK)
     {
-        dir = getch();
-        switch (dir) {
+        dir = messages;
+        if (dir != -1){
+            state = dir;
+        }
+        switch (state) {
         case 'i':
             Init();
             std::cout << "init" << std::endl;
@@ -265,6 +303,7 @@ void CMouseCtrl::Ctrl()
     }
 }
 
+/*
 int CMouseCtrl::getch()
 {
     int c = std::cin.peek();
@@ -283,6 +322,7 @@ int CMouseCtrl::getch()
     return dir;
     }
 }
+*/
 
 void CMouseCtrl::Print(int length)
 {
@@ -340,6 +380,14 @@ void CMouseCtrl::clearArr(){
     }
 }
 
+//starting the loop thread
+void CMouseCtrl::startThread() {
+    std::cout << "starting UART and MOUSE thread"<<std::endl;
+    std::thread t1 ([=] { Ctrl(); });
+    //t1 = std::thread { [] { Ctrl {} (); } };
+    t1.detach();
+    std::cout << "Walker thread detached"<<std::endl;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // leg machine methods

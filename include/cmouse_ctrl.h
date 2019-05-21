@@ -2,6 +2,7 @@
 #define CMOUSE_CTRL_H
 
 #include "kinematics.h"
+#include <thread>
 
 // ROS includes
 #include "ros/ros.h"
@@ -92,9 +93,11 @@ public:
     void Ctrl();
     void Trot(int motionlength);
     void Init(int length = 1);
-    int getch();
+    //int getch();
     void clearArr();
+    void startThread();
 
+    int messages;
 
     static const int ArrayBuffer = 100;
     static const int Motors = 13;
@@ -134,12 +137,27 @@ public:
     void RosCtrl();
     void Publish(int length = 1);
 
+    void ROSstartThread();
 private:
 
     std_msgs::Float64MultiArray msgarr;
 
     ros::NodeHandle n;
     ros::Publisher pub;
+
+};
+
+class CMouseUI
+{
+public:
+    CMouseUI(int& msg) : _msg(msg) { }
+    virtual ~CMouseUI() {}
+
+    void process();
+
+private:
+    int getch();
+    int& _msg;
 
 };
 
