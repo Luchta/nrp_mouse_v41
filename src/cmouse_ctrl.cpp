@@ -47,43 +47,74 @@ void CMouseRos::ROSstartThread() {
 void CMouseRos::RosCtrl()
 {
     int motionlength = 50;
-    int dir = '0';
-    char state = '0';
+    int cmd = '0';
+    int state = '0';
+    bool newArray = true;
     clearArr(); //set everything to 90 deg, to avoid damage.
 
-    //while(ros.OK)
     while (ros::ok())
     {
-        //dir = getch();
-        dir = messages;
-        if (dir != -1){
-            state = dir;
+        cmd = messages; //just one access to messages per run - not yet atomic!!
+        if (cmd != state && cmd != 0){
+            newArray = true;
+            state = cmd;
         }
         switch (state) {
         case 'i':
-            Init();
+            dir = stop;
             std::cout << "init" << std::endl;
+            newArray = false;
+            messages = 0;
+            Init();
             Publish();
+            state = 'h';
             break;
         case 'w':
-            Trot(motionlength);
-            std::cout << "Straight ahead" << std::endl;
+            if (newArray){
+                dir = Fwd;
+                std::cout << "Straight ahead" << std::endl;
+                Trot(motionlength);
+                newArray = false;
+                messages = 0;
+            }
             Publish(motionlength);
             break;
         case 'a':
-            std::cout<<"Left Turn"<<std::endl;
+            if (newArray){
+                dir = left;
+                std::cout<<"Left Turn"<<std::endl;
+                Trot(motionlength);
+                newArray = false;
+                messages = 0;
+            }
+            Publish(motionlength);
             break;
         case 's':
-            std::cout<<"Backwards"<<std::endl;
+            if (newArray){
+                dir = Bkwd;
+                std::cout<<"Backwards"<<std::endl;
+                TrotBkw(motionlength);
+                newArray = false;
+                messages = 0;
+            }
+            Publish(motionlength);
             break;
         case 'd':
-            std::cout<<"Right Turn"<<std::endl;
+            if (newArray){
+                dir = right;
+                std::cout<<"Right Turn"<<std::endl;
+                Trot(motionlength);
+                newArray = false;
+                messages = 0;
+            }
+            Publish(motionlength);
             break;
         case 'q':
             std::cout<<"Quitting"<<std::endl;
+            messages = '.';
             return;
-        case 'e':
-            std::cout<<"DUMP"<<std::endl;
+        case 'h':
+            usleep(90);
 
             break;
         }
@@ -124,8 +155,8 @@ void CMouseUI::process()
 {
 
     do {
-    _msg = getch();
-    usleep(100);
+        _msg = getch();
+        usleep(100);
     }while (_msg != '.');
 }
 
@@ -146,7 +177,7 @@ int CMouseUI::getch()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CMouseCtrl Methods
 
-void CMouseCtrl::Init(int length)
+void CMouseCtrl::Init(int length) //initalizes all legs to zero position
 {
     int i;
     CLegPos tmpLeg;
@@ -185,16 +216,30 @@ void CMouseCtrl::Init(int length)
 
 }
 
-void CMouseCtrl::Trot(int motionlength)
+void CMouseCtrl::Trot(int motionlength) //calculates trott gait
 {
     //Variables
     int halfMotion = motionlength/2;
     int i;
     CLegPos tmp;
     CSpinePos tmpSpine;
+    //TODO
+    int dir;
 
     //Spine positions
-    tmpSpine = Spine.centre();
+    switch (dir){
+    case Fwd:
+    case stop:
+    case Bkwd:
+        tmpSpine = Spine.centre();
+        break;
+    case left:
+        tmpSpine = Spine.moveStepRight(motionlength);
+        break;
+    case right:
+        tmpSpine = Spine.moveStepLeft(motionlength);
+        break;
+    }
 
     //Setting Goals starting with Right leg forward
     LHindLeft.StartLeg(uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
@@ -252,7 +297,89 @@ void CMouseCtrl::Trot(int motionlength)
 
 }
 
-void CMouseCtrl::Ctrl()
+void CMouseCtrl::TrotBkw(int motionlength) //calculates trott gait moving backwards
+{
+    //Variables
+    int halfMotion = motionlength/2;
+    int i;
+    CLegPos tmp;
+    CSpinePos tmpSpine;
+    //TODO
+    int dir;
+
+    //Spine positions
+    switch (dir){
+    case Fwd:
+    case stop:
+    case Bkwd:
+        tmpSpine = Spine.centre();
+        break;
+    case left:
+        tmpSpine = Spine.moveStepRight(motionlength);
+        break;
+    case right:
+        tmpSpine = Spine.moveStepLeft(motionlength);
+        break;
+    }
+
+
+    //Setting Goals starting with Right leg forward
+    LHindLeft.StartLeg(uStepLengthH+uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
+    LHindRight.StartLeg(uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
+    LForeLeft.StartLeg(uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
+    LForeRight.StartLeg(uStepLengthF+uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
+
+    //calculate Servo Values and write the points to TrottArray
+    for (i=0; i<halfMotion; i++)
+    {
+        TrottArray[i][TIMESTAMP] = i;
+        tmp = LHindLeft.GetNext();
+        TrottArray[i][HINDLEFT_HIP] = tmp.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmp.coil;
+        tmp = LHindRight.GetNext();
+        TrottArray[i][HINDRIGHT_HIP] = tmp.leg;
+        TrottArray[i][HINDRIGHT_KNEE] = tmp.coil;
+        tmp = LForeLeft.GetNext();
+        TrottArray[i][FORELEFT_HIP] = tmp.leg;
+        TrottArray[i][FORELEFT_KNEE] = tmp.coil;
+        tmp = LForeRight.GetNext();
+        TrottArray[i][FORERIGHT_HIP] = tmp.leg;
+        TrottArray[i][FORERIGHT_KNEE] = tmp.coil;
+        TrottArray[i][SPINE] = tmpSpine.spine;
+        TrottArray[i][TAIL] = tmpSpine.tail;
+        TrottArray[i][SPINE_FLEX] = Spine.stretch();
+    }
+
+    // Setting Leg Goals starting with Left leg forward
+    LHindLeft.StartLeg(uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
+    LHindRight.StartLeg(uStepLengthH+uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
+    LForeLeft.StartLeg(uStepLengthF+uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
+    LForeRight.StartLeg(uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
+
+    //calculate Servo Values and write the points to TrottArray
+    for (i=halfMotion; i<motionlength; i++)
+    {
+        TrottArray[i][TIMESTAMP] = i;
+        tmp = LHindLeft.GetNext();
+        TrottArray[i][HINDLEFT_HIP] = tmp.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmp.coil;
+        tmp = LHindRight.GetNext();
+        TrottArray[i][HINDRIGHT_HIP] = tmp.leg;
+        TrottArray[i][HINDRIGHT_KNEE] = tmp.coil;
+        tmp = LForeLeft.GetNext();
+        TrottArray[i][FORELEFT_HIP] = tmp.leg;
+        TrottArray[i][FORELEFT_KNEE] = tmp.coil;
+        tmp = LForeRight.GetNext();
+        TrottArray[i][FORERIGHT_HIP] = tmp.leg;
+        TrottArray[i][FORERIGHT_KNEE] = tmp.coil;
+        TrottArray[i][SPINE] = tmpSpine.spine;
+        TrottArray[i][TAIL] = tmpSpine.tail;
+        TrottArray[i][SPINE_FLEX] = Spine.stretch();
+    }
+
+}
+
+void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
     int motionlength = 50;
     char dir = '0';
@@ -324,7 +451,7 @@ int CMouseCtrl::getch()
 }
 */
 
-void CMouseCtrl::Print(int length)
+void CMouseCtrl::Print(int length) //print the array values for calculated lengthss
 {
     std::cout << "TIMESTAMP; "
               << "FORELEFT_HIP; "
@@ -360,7 +487,7 @@ void CMouseCtrl::Print(int length)
     }
 }
 
-void CMouseCtrl::clearArr(){
+void CMouseCtrl::clearArr(){    //clear the TrottArray
     for(int i=0;i<ArrayBuffer;i++)
     {
         TrottArray[i][TIMESTAMP] = 0 ;
@@ -380,8 +507,7 @@ void CMouseCtrl::clearArr(){
     }
 }
 
-//starting the loop thread
-void CMouseCtrl::startThread() {
+void CMouseCtrl::startThread() { //starting the loop thread
     std::cout << "starting UART and MOUSE thread"<<std::endl;
     std::thread t1 ([=] { Ctrl(); });
     //t1 = std::thread { [] { Ctrl {} (); } };
@@ -392,7 +518,7 @@ void CMouseCtrl::startThread() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // leg machine methods
 
-
+//initalizes trajectory
 void CMouseLeg::StartLeg(double x, double y, int length, typPhase phase)
 {
     //length is the length of the array to be filled = number of steps
@@ -401,6 +527,7 @@ void CMouseLeg::StartLeg(double x, double y, int length, typPhase phase)
     StepStart(x,y);
 }
 
+//dumps debugging info
 void CMouseLeg::Dump()
 {
     std::cout << leg << "; " << side << "; " << pawLift << "\n";
@@ -410,6 +537,7 @@ void CMouseLeg::Dump()
     }
 }
 
+//returns the next waypoint in the given trajectory and the endpoint if invoked after end of Trajectory
 CLegPos CMouseLeg::GetNext()
 {
     if (StepNext()){
@@ -440,6 +568,7 @@ void CMouseLeg::StepStart(double x, double y)   // step mode by trajectory
     }
 }
 
+//invokes NextWayPoint until trajectory is finished
 bool CMouseLeg::StepNext()
 {
     if (++step > stepcount) return false;  // fertig
@@ -449,6 +578,7 @@ bool CMouseLeg::StepNext()
     return true;                           // weiter gehts
 }
 
+//calculates and returns next point of trajectory - when given the swing phase it lifts the leg up
 CLegPos CMouseLeg::NextWayPoint()
 {
     double X = ptLeg.x+vx, Y = ptLeg.y+vy;        // N�chsten Punkt ab current ptLeg errechnen
@@ -457,13 +587,15 @@ CLegPos CMouseLeg::NextWayPoint()
                         : ikhindleg(X, Y, side);
 }
 
+// returns the servo values for the leg and sets current internal positios
 CLegPos CMouseLeg::SetPosition(CLegPos ang)
 {
-    docu[step] = ptLeg;
+    docu[step] = ptLeg; //documentation for debugging
     ptLeg.x += vx;  ptLeg.y += vy;      // Vektor auf letzten Punkt addieren
     return ang; //output zurückgeben
 }
 
+//calculates distance between two points
 float CMouseLeg::Distance(float x1, float y1, float x2, float y2)
 {
     return std::hypot((x2-x1),(y2-y1));
@@ -472,16 +604,20 @@ float CMouseLeg::Distance(float x1, float y1, float x2, float y2)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // spine machine methods
 
+//returns a stretched position value
 double CSpine::stretch()
 {
     return posStreched;
 }
 
+//returns a crouched position value
 double CSpine::crouch()
 {
     return posCrouched;
 }
 
+//moving the Spine and Tail smoothly during walking
+//every call to this funtion gives the next value for a given amount of iterations (length)
 CSpinePos CSpine::moveLeft(int length)
 {
     if(leftStart){
@@ -510,6 +646,25 @@ CSpinePos CSpine::moveRight(int length)
     return CSpinePos(curSP, curTL);
 }
 
+//moving the Spine and Tail stepwise for direction control
+//every call to this funtion gives the next hihger bending iteration until the maximum bending is reached.
+CSpinePos CSpine::moveStepLeft(int length)
+{
+    if ((curSP += spineStep) < posFarLeft){
+        curSP = posFarLeft;
+    }
+    return CSpinePos(curSP, curTL);
+}
+
+CSpinePos CSpine::moveStepRight(int length)
+{
+    if ((curSP += spineStep) > posFarRight){
+        curSP = posFarRight;
+    }
+    return CSpinePos(curSP, curTL);
+}
+
+//centering the Spine
 CSpinePos CSpine::centre()
 {
     return CSpinePos((posCentre+cOffsetSpine), (posCentre+cOffsetTail));
