@@ -5,7 +5,9 @@ Control Software for remote control of the NRP Robot Mouse
 ## Prerequisites
 
 Setup a ROS environment on the RaspberryPi
+
 Install the adafruit ServoKit Library
+
   https://learn.adafruit.com/adafruit-16-channel-pwm-servo-hat-for-raspberry-pi/using-the-python-library
   
 
