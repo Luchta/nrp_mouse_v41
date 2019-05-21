@@ -36,7 +36,7 @@ private:
     const int posFarLeft = 20;
     const int posFarRight = 130;
     const int posStreched = 90;
-    const int posCrouched = 0;
+    const int posCrouched = 180;
     const int cOffsetSpine = 8;
     const int cOffsetTail = 0;
     const int cOffsetFlex = 0;

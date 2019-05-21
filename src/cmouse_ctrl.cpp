@@ -40,13 +40,17 @@ void CMouseRos::RosCtrl()
 {
     int motionlength = 50;
     char dir = '0';
+    char state = '0';
     clearArr(); //set everything to 90 deg, to avoid damage.
 
     //while(ros.OK)
     while (ros::ok())
     {
         dir = getch();
-        switch (dir) {
+        if (dir != -1){
+            state = dir;
+        }
+        switch (state) {
         case 'i':
             Init();
             std::cout << "init" << std::endl;
@@ -263,7 +267,12 @@ void CMouseCtrl::Ctrl()
 
 int CMouseCtrl::getch()
 {
-    //a blocking getchar()
+    int c = std::cin.peek();
+
+    if (c == EOF){
+        return -1;
+    }else{
+    //a non blocking getchar()
     static struct termios oldt, newt;
     tcgetattr( STDIN_FILENO, &oldt);           // save old settings
     newt = oldt;
@@ -272,6 +281,7 @@ int CMouseCtrl::getch()
     int dir = getchar();  // read character (non-blocking)
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
     return dir;
+    }
 }
 
 void CMouseCtrl::Print(int length)
