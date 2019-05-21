@@ -44,30 +44,29 @@ kit.servo[0].actuation_range = 180
 #Head    (up/down)               	SB: 13
 
 def clamp(n):
-	
+	n = abs(round(n))
 	if n < 0:
 		return 0
 	elif n > 180:
 		return 180
 	else:
-		return (abs(round(n)))
+		return n
 
 def messageCb(msgarr):
 	kit.servo[0].angle = clamp(msgarr.data[5]) #hla1
 	kit.servo[1].angle = clamp(msgarr.data[6]) #hla2
 	kit.servo[2].angle = clamp(msgarr.data[7]) #hra1
-	kit.servo[3].angle = clamp(msgarr.data[8]) #hra2
+	kit.servo[3].angle = 180-clamp(msgarr.data[8]) #hra2
 	kit.servo[4].angle = clamp(msgarr.data[9]) #spine
 	kit.servo[5].angle = clamp(msgarr.data[10]) #tail
-	kit.servo[8].angle = ( clamp(msgarr.data[3])) #fla1
-	kit.servo[9].angle = ( clamp(msgarr.data[4])) #fla2
-	kit.servo[10].angle = ( clamp(msgarr.data[1])) #fra1
-	kit.servo[11].angle = ( clamp(msgarr.data[2])) #fra2
+	kit.servo[8].angle = clamp(msgarr.data[3]) #fla1
+	kit.servo[9].angle = clamp(msgarr.data[4]) #fla2
+	kit.servo[10].angle = clamp(msgarr.data[1]) #fra1
+	kit.servo[11].angle = clamp(msgarr.data[2]) #fra2
+	kit.servo[7].angle = clamp(msgarr.data[11]) #spine2
+#	kit.servo[12].angle = clamp(msgarr.data[2]) #Head LR
+#	kit.servo[13].angle = clamp(msgarr.data[3]) #HEAD UD
 
-#	kit.servo[8].angle = (180- clamp(msgarr.data[1])) #fla1
-#	kit.servo[9].angle = (180-clamp(msgarr.data[2])) #fla2
-#	kit.servo[10].angle = (180-clamp(msgarr.data[3])) #fra1
-#	kit.servo[11].angle = (180-clamp(msgarr.data[4])) #fra2
 
       
 def listener():
