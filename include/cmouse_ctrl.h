@@ -38,7 +38,7 @@ public:
 private:
     const int RangeLeft = 50;
     const int RangeRight = 130;
-    const int posStreched = 90;
+    const int posStreched = 110;
     const int posCrouched = 180;
     const int cOffsetSpine = -15;
     const int cOffsetTail = 0;
