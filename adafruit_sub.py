@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Float64MultiArray
-from nrp_mouse_v2.msg import nrpmouse_msg
-  
+#from nrp_mouse_v2.msg import nrpmouse_msg
 from adafruit_servokit import ServoKit
 
 
@@ -25,7 +24,7 @@ kit.servo[12].set_pulse_width_range(700, 2300)
 kit.servo[13].set_pulse_width_range(700, 2300)
 
 #servo range adaption
-kit.servo[0].actuation_range = 180
+#kit.servo[0].actuation_range = 180
 
 
 #numbering
@@ -44,7 +43,7 @@ kit.servo[0].actuation_range = 180
 #Head    (up/down)               	SB: 13
 
 def clamp(n):
-        n = abs(n)
+    n = abs(n)
 
 	if n < 0:
 		return 0
@@ -69,19 +68,16 @@ def messageCb(msgarr):
 	kit.servo[13].angle = (clamp(msgarr.data[13])) #head2
 #	kit.servo[11].angle = (180-clamp(msgarr.data[4])) #fra2
 
-      
 def listener():
-  
-      	# In ROS, nodes are uniquely named. If two nodes with the same
-      	# name are launched, the previous one is kicked off. The
-      	# anonymous=True flag means that rospy will choose a unique
-      	# name for our 'listener' node so that multiple listeners can
-      	# run simultaneously.
+# In ROS, nodes are uniquely named. If two nodes with the same
+# name are launched, the previous one is kicked off. The
+# anonymous=True flag means that rospy will choose a unique
+# name for our 'listener' node so that multiple listeners can
+# run simultaneously.
 	rospy.init_node('listener', anonymous=False) 
 	rospy.Subscriber("nrpmouse_servotopic", Float64MultiArray, messageCb)
-      	# spin() simply keeps python from exiting until this node is stopped
-	rospy.spin()
-  
+# spin() simply keeps python from exiting until this node is stopped
+        rospy.spin()
+
 if __name__ == '__main__':
 	listener()
-
