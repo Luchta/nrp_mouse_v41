@@ -104,7 +104,7 @@ void CMouseRos::RosCtrl()
             Publish(80);
             messages = 0;
             state = 'h';
-            return;
+            break;
         case 'q':   //quit programm
             std::cout<<"Quitting"<<std::endl;
             clearArr();
@@ -259,8 +259,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
     }
 
-    LHindLeft.StartLeg(0, 0, leng_init, CMouseLeg::Stance);
-    LHindRight.StartLeg(0, 0, leng_init, CMouseLeg::Stance);
+    LHindLeft.StartLeg(50, 0, leng_init, CMouseLeg::Stance);
+    LHindRight.StartLeg(50, 0, leng_init, CMouseLeg::Stance);
 
     for (i=leng_up; i<length; i++)
     {

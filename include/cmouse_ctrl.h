@@ -143,7 +143,7 @@ private:
     const int uStepLengthF    = 70;  // length of one leg move on the ground
     const int uStepLengthH    = 70;  // length of one leg move on the ground
     const int uWalkLevel      = 5;//10;  // y walking level of init and walking
-    const int uSitting_x      = 70;  // X position for foot in sitting
+    const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
 
 
