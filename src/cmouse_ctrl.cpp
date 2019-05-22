@@ -216,7 +216,7 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
 void CMouseCtrl::Trot(int motionlength) //calculates trott gait
 {
     //Variables
-    int halfMotion = motionlength/2;
+    int halfMotion = (int)round(motionlength/2);
     int i;
     CLegPos tmp;
     CSpinePos tmpSpine;

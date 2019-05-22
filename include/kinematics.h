@@ -25,12 +25,12 @@ class CKinematics
 {
 public:
     CKinematics() {
-      rp1=6.75;        //radius of the pulley
+     /* rp1=7.5;//6.75;        //radius of the pulley
       
       //Foreleg
-      fl1=31.0;        //l_humerus length upper arm
-      fl2=26.0;        //l_ulna length forearm
-      fl3=13.0;        //l_hand length hand
+      fl1=29.5; //31.0;        //l_humerus length upper arm
+      fl2=18; //26.0;        //l_ulna length forearm
+      fl3=19; //13.0;        //l_hand length hand
       ft1i=54.24;      //180° - init angle shoulder
       ft2i=87.65;      //180° - init angle elbow
       ft3i=155.0;      //init angle hand
@@ -43,9 +43,9 @@ public:
       fksainit=80;
       
       //Hindleg
-      hl1=35.0;        //l_femur 	(thigh Oberschenkel)
-      hl2=40.0;        //l_tibia 	(lower leg Unterschenkel)
-      hl3=19.0;        //l_toe		(toe Zeh)
+      hl1=31.66; //35.0;        //l_femur 	(thigh Oberschenkel)
+      hl2=39.40; //40.0;        //l_tibia 	(lower leg Unterschenkel)
+      hl3=20; //19.0;        //l_toe		(toe Zeh)
       ht1i=7.49;       //a_femur	(init angle femur)
       ht2i=108.93;     //a_knee	(180 - init angle knee)
       ht3i=110.0;      //a_toe		(init angle toe)
@@ -53,9 +53,9 @@ public:
       //Hindleg_Servo_Positions
       hlsi=47.477;     //hlsi=37.687+(hahip*pi/180*hrhip); //initial total length
       hltibia=16.037;  //string attachment point on tibia
-      hrhip=3.5;       //effective radius of the pulley
+      hrhip=4; //3.5;       //effective radius of the pulley
       hahip=160.26;    //initial angle of string routed on the hip
-      hksainit=40;
+      hksainit=40;*/
     }
 
     void createWaypoints(int Ax, int Ay, int Bx, int By, int *waypoints, int lengths);
@@ -75,37 +75,43 @@ private:
     //double hpos_trotinit[1][2]={20,59.15};	//refined values
 
 
-    double rp1;//=6.75;           //radius of the pulley
+    static const double rp1;//=6.75;           //radius of the pulley
                
     //Foreleg 
-    double fl1;//=31.0;        //l_humerus length upper arm
-    double fl2;//=26.0;        //l_ulna length forearm
-    double fl3;//=13.0;        //l_hand length hand
-    double ft1i;//=54.24;      //180° - init angle shoulder
-    double ft2i;//=87.65;      //180° - init angle elbow
-    double ft3i;//=155.0;      //init angle hand
+    const double fl1=27.8;//31.0;        //l_humerus length upper arm
+     const double fl2=26.4;//26.0;        //l_ulna length forearm
+     const double fl3=14.2;//13.0;        //l_hand length hand
+     const double ft1i=54.24;      //180° - init angle shoulder
+     const double ft2i=87.65;      //180° - init angle elbow
+     const double ft3i=155.0;      //init angle hand
 
     //Foreleg_Servo_Positions
-    double flsi;//=48.332; 	//flsi=41.198+(fahip*pi/180*frhip); //initial calculated length
-    double fltibia;//=13.914;  //string attachment point on tibia
-    double frhip;//=3.5;       //effective radius of the pulley
-    double fahip;//=116.79;    //initial angle of string routed on the hip
-    double fksainit;//=80;
+     const double fltibia=10;//13.914;  //string attachment point on tibia
+     const double frhip=4;//3.5;       //effective radius of the pulley
+     const double fahip=116.79;    //initial angle of string routed on the hip
+     const double fksainit=80;
+     //const double flsi=48.332; 	//flsi=41.198+(fahip*pi/180*frhip); //initial calculated length
+     const double flipfree=41.198; 	//inital length of free string Attachment-Hip
+     const double flsi=flipfree+(fahip*3.1415/180*frhip); //initial calculated length
+
 
     //Hindleg
-    double hl1;//=35.0;        //l_femur 	(thigh Oberschenkel)
-    double hl2;//=40.0;        //l_tibia 	(lower leg Unterschenkel)
-    double hl3;//=19.0;        //l_toe		(toe Zeh)
-    double ht1i;//=7.49;       //a_femur	(init angle femur)
-    double ht2i;//=108.93;     //a_knee	(180 - init angle knee)
-    double ht3i;//=110.0;      //a_toe		(init angle toe)
+     const double hl1=35.0;        //l_femur 	(thigh Oberschenkel)
+     const double hl2=39.4;//40.0;        //l_tibia 	(lower leg Unterschenkel)
+     const double hl3=20;//19.0;        //l_toe		(toe Zeh)
+     const double ht1i=7.49;       //a_femur	(init angle femur)
+     const double ht2i=108.93;     //a_knee	(180 - init angle knee)
+     const double ht3i=110.0;      //a_toe		(init angle toe)
 
     //Hindleg_Servo_Positions
-    double hlsi;//=47.477;     //hlsi=37.687+(hahip*pi/180*hrhip); //initial total length
-    double hltibia;//=16.037;  //string attachment point on tibia
-    double hrhip;//=3.5;       //effective radius of the pulley
-    double hahip;//=160.26;    //initial angle of string routed on the hip
-    double hksainit;//=40;
+     const double hltibia=17.4;//16.037;  //string attachment point on tibia
+     const double hrhip=4;//3.5;       //effective radius of the pulley
+     const double hahip=160.26;    //initial angle of string routed on the hip
+     const double hksainit=40;
+     //const double hlsi=47.477;     //hlsi=37.687+(hahip*pi/180*hrhip); //initial total length
+     const double hlhipfree=37.687;     //initial length of string hip-attachment
+     const double hlsi=hlhipfree+(hahip*3.1415/180*hrhip); //initial total length
+
 
     //Functions
 

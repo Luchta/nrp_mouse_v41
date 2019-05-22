@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Float64MultiArray
-from nrp_mouse_v2.msg import nrpmouse_msg
   
 from adafruit_servokit import ServoKit
 

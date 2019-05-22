@@ -136,13 +136,13 @@ private:
     CSpine Spine = CSpine();
 
     //VARIABLES
-    static const int Lift = 15;
+    static const int Lift = 15; //height of the foot lift
     const int uFrontLegStart  = -10;  // x start pos. of pace
     const int uHindLegStart   = -20;
     const int uStepLengthF    = 70;  // length of one leg move on the ground
     const int uStepLengthH    = 70;  // length of one leg move on the ground
-    const int uWalkLevel      = 10;  // y walking level of init and walking
-    const int uPawLift        = 10;  // H�he �ber Grund bei forward move
+    const int uWalkLevel      = 5;//10;  // y walking level of init and walking
+    //const int uPawLift        = 15;  // H�he �ber Grund bei forward move
 
     double MotionArray[ArrayBuffer][Motors+1];
 
