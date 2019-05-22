@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     UI.process();
     //Mouse.RosCtrl();
 
-    ros::spin();
+    //ros::spin();
 
     return 0;
 }

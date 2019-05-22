@@ -33,6 +33,7 @@ CMouseRos::CMouseRos()
 {
     msgarr.data.resize(14); //need to declare the size, else it wont work
     pub = n.advertise<std_msgs::Float64MultiArray>("nrpmouse_servotopic", 512);
+    n.setParam("length", 50);
     //ros::Rate loop_rate(10); //run at 10Hz, not sleep time
 }
 
@@ -59,6 +60,7 @@ void CMouseRos::RosCtrl()
             //newArray = true;
             state = cmd;
         }
+        n.param("length", motionlength, 50);
         switch (state) {
         case 'i':   //initalize pose
             dir = stop;
@@ -96,11 +98,17 @@ void CMouseRos::RosCtrl()
             messages = 0;
             state = 'm';
             break;
+        case 'y':   //quit programm
+            std::cout<<"Sitting"<<std::endl;
+            SitUp(80);
+            Publish(80);
+            messages = 0;
+            state = 'h';
+            return;
         case 'q':   //quit programm
             std::cout<<"Quitting"<<std::endl;
             clearArr();
             Publish();
-            messages = '.';
             return;
         case 'm':   //publish motions to ros
             Publish(motionlength);
@@ -151,7 +159,7 @@ void CMouseUI::process()
     do {
         _msg = getch();
         usleep(100);
-    }while (_msg != '.');
+    }while (_msg != 'q');
 }
 
 int CMouseUI::getch()
@@ -209,6 +217,62 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
         TrottArray[i][SPINE] = tmpSpine.spine;
         TrottArray[i][TAIL] = tmpSpine.tail;
         TrottArray[i][SPINE_FLEX] = 180;
+    }
+
+}
+
+void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
+{
+    int i, leng_init, leng_up;
+    CLegPos tmpLeg;
+    CSpinePos tmpSpine;
+
+    //caculate array segmentation
+    // left leg to start - right leg to start - Spine to fix + Sit up
+    leng_init = (int)round(length * 0.25);
+    leng_up = (leng_init * 2);
+    //leng_up = length - l2;
+
+    clearArr();
+
+    //Spine positions
+    tmpSpine = Spine.centre();
+
+    //initalize Leg motion with Right leg forward
+    LHindLeft.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Stance);
+    LHindRight.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Stance);
+
+
+    //calculate Servo Values and write the points to TrottArray
+    for (i=0; i<leng_init; i++)
+    {
+        TrottArray[i][TIMESTAMP] = i;
+        tmpLeg = LHindLeft.GetNext();
+        TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
+    }
+    for (i=leng_init; i<leng_up; i++)
+    {
+        TrottArray[i][TIMESTAMP] = i;
+        tmpLeg = LHindRight.GetNext();
+        TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
+    }
+
+    LHindLeft.StartLeg(0, 0, leng_init, CMouseLeg::Stance);
+    LHindRight.StartLeg(0, 0, leng_init, CMouseLeg::Stance);
+
+    for (i=leng_up; i<length; i++)
+    {
+        TrottArray[i][TIMESTAMP] = i;
+        tmpLeg = LHindLeft.GetNext();
+        TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
+        tmpLeg = LHindRight.GetNext();
+        TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
+
+        TrottArray[i][SPINE_FLEX] = 150;
     }
 
 }

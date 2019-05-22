@@ -123,6 +123,7 @@ public:
     typDir dir = stop;
 
 
+    void SitUp(int length);
 private:
     //FUNCTIONS
     void TrotRight();
@@ -135,14 +136,16 @@ private:
     CMouseLeg LHindRight = CMouseLeg('h','r', Lift);
     CSpine Spine = CSpine();
 
-    //VARIABLES
+    //Motion Parameters
     static const int Lift = 15; //height of the foot lift
     const int uFrontLegStart  = -10;  // x start pos. of pace
     const int uHindLegStart   = -20;
     const int uStepLengthF    = 70;  // length of one leg move on the ground
     const int uStepLengthH    = 70;  // length of one leg move on the ground
     const int uWalkLevel      = 5;//10;  // y walking level of init and walking
-    //const int uPawLift        = 15;  // H�he �ber Grund bei forward move
+    const int uSitting_x      = 70;  // X position for foot in sitting
+    const int uSitting_y      = 30;  // Y position for foot in sitting
+
 
     double MotionArray[ArrayBuffer][Motors+1];
 

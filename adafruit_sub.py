@@ -44,7 +44,7 @@ kit.servo[0].actuation_range = 180
 #Head    (up/down)               	SB: 13
 
 def clamp(n):
-	n = abs(round(n))	
+        n = abs(n)
 
 	if n < 0:
 		return 0
