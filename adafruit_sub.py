@@ -43,7 +43,7 @@ kit.servo[13].set_pulse_width_range(700, 2300)
 #Head    (up/down)               	SB: 13
 
 def clamp(n):
-    n = abs(n)
+	n = abs(n)
 
 	if n < 0:
 		return 0
@@ -74,10 +74,10 @@ def listener():
 # anonymous=True flag means that rospy will choose a unique
 # name for our 'listener' node so that multiple listeners can
 # run simultaneously.
-	rospy.init_node('listener', anonymous=False) 
+	rospy.init_node('listener', anonymous=False)
 	rospy.Subscriber("nrpmouse_servotopic", Float64MultiArray, messageCb)
 # spin() simply keeps python from exiting until this node is stopped
-        rospy.spin()
+	rospy.spin()
 
 if __name__ == '__main__':
 	listener()
