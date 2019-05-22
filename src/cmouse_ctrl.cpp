@@ -254,6 +254,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     for (i=leng_init; i<leng_up; i++)
     {
         TrottArray[i][TIMESTAMP] = i;
+        TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
         tmpLeg = LHindRight.GetNext();
         TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
@@ -549,17 +551,30 @@ void CMouseCtrl::Print(int length) //print the array values for calculated lengt
 }
 
 void CMouseCtrl::clearArr(){    //clear the TrottArray
+
+    CLegPos tmpLeg;
+
+    //initalize Leg motion with Right leg forward
+    LHindLeft.StartLeg(0, 0, 1, CMouseLeg::Stance);
+    LHindRight.StartLeg(0, 0, 1, CMouseLeg::Stance);
+    LForeLeft.StartLeg(0, 0, 1, CMouseLeg::Stance);
+    LForeRight.StartLeg(0, 0, 1, CMouseLeg::Stance);
+
     for(int i=0;i<ArrayBuffer;i++)
     {
         TrottArray[i][TIMESTAMP] = 0 ;
-        TrottArray[i][FORELEFT_HIP]= 90 ;
-        TrottArray[i][FORELEFT_KNEE] = 90 ;
-        TrottArray[i][FORERIGHT_HIP] = 90 ;
-        TrottArray[i][FORERIGHT_KNEE] = 90 ;
-        TrottArray[i][HINDLEFT_HIP] = 90 ;
-        TrottArray[i][HINDLEFT_KNEE] = 90 ;
-        TrottArray[i][HINDRIGHT_HIP] = 90 ;
-        TrottArray[i][HINDRIGHT_KNEE] = 90 ;
+        tmpLeg = LHindLeft.GetNext();
+        TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
+        tmpLeg = LHindRight.GetNext();
+        TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
+        TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
+        tmpLeg = LForeLeft.GetNext();
+        TrottArray[i][FORELEFT_HIP] = tmpLeg.leg;
+        TrottArray[i][FORELEFT_KNEE] = tmpLeg.coil;
+        tmpLeg = LForeRight.GetNext();
+        TrottArray[i][FORERIGHT_HIP] = tmpLeg.leg;
+        TrottArray[i][FORERIGHT_KNEE] = tmpLeg.coil;
         TrottArray[i][SPINE] = 90 ;
         TrottArray[i][TAIL] = 90 ;
         TrottArray[i][SPINE_FLEX] = 180 ;
