@@ -14,7 +14,7 @@ kit.servo[2].set_pulse_width_range(700, 2300)
 kit.servo[3].set_pulse_width_range(700, 2300)
 kit.servo[4].set_pulse_width_range(700, 2300)
 kit.servo[5].set_pulse_width_range(700, 2300)
-#kit.servo[6].set_pulse_width_range(700, 2300)
+#kit.servo[6].set_pulse_width_range(700, 2300) no servo attached
 kit.servo[7].set_pulse_width_range(700, 2300)
 kit.servo[8].set_pulse_width_range(700, 2300)
 kit.servo[9].set_pulse_width_range(700, 2300)
@@ -77,7 +77,7 @@ def listener():
       	# anonymous=True flag means that rospy will choose a unique
       	# name for our 'listener' node so that multiple listeners can
       	# run simultaneously.
-	rospy.init_node('listener', anonymous=False) 
+        rospy.init_node('listener', anonymous=False) #only one listener active at any time
 	rospy.Subscriber("nrpmouse_servotopic", Float64MultiArray, messageCb)
       	# spin() simply keeps python from exiting until this node is stopped
 	rospy.spin()
