@@ -251,11 +251,14 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
     }
-    for (i=leng_init; i<leng_up; i++)
+	int ll = tmpLeg.leg;
+	int lc = tmpLeg.coil;
+  
+ for (i=leng_init; i<leng_up; i++)
     {
         TrottArray[i][TIMESTAMP] = i;
-        TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
-        TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
+        TrottArray[i][HINDLEFT_HIP] = ll;
+        TrottArray[i][HINDLEFT_KNEE] = lc;
         tmpLeg = LHindRight.GetNext();
         TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;

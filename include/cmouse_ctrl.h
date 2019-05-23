@@ -100,7 +100,7 @@ private:
 class CMouseCtrl
 {
 public:
-    CMouseCtrl() {}
+    CMouseCtrl() {clearArr();}
     virtual ~CMouseCtrl() {}
     //FUNCTIONS
     //control
