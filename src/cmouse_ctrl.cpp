@@ -239,8 +239,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     tmpSpine = Spine.centre();
 
     //initalize Leg motion with Right leg forward
-    LForeLeft.StartLeg(uFrontLegStart, 0, leng_init, CMouseLeg::Stance);
-    LForeRight.StartLeg(uFrontLegStart, 0, leng_init, CMouseLeg::Stance);
+    LForeLeft.StartLeg(uFrontLegStart+uStepLengthF, 0, leng_init, CMouseLeg::Stance);
+    LForeRight.StartLeg(uFrontLegStart+uStepLengthF, 0, leng_init, CMouseLeg::Stance);
     LHindLeft.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Swing);
     LHindRight.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Stance);
 
@@ -257,7 +257,7 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
     }
-        int ll = 0; //leg most forward
+        int ll = 180; //leg most forward
         int lc = 180; //coil most released
         int changeAbsolute = leng_up - (leng_init/4);
   
@@ -289,7 +289,7 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     LHindLeft.StartLeg(50, 0, leng_init, CMouseLeg::Stance);
     LHindRight.StartLeg(50, 0, leng_init, CMouseLeg::Stance);
 
-    int posSpineSit = 110;
+    int posSpineSit = 150;
     int posSpineStart = 180;
     double spineCurr = posSpineStart;
     double spineStep = (length-leng_up)/posSpineSit;
@@ -305,6 +305,12 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         tmpLeg = LHindRight.GetNext();
         TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
+	//keep forelegs in position
+        TrottArray[i][FORELEFT_HIP] = TrottArray[i-1][FORELEFT_HIP];
+        TrottArray[i][FORELEFT_KNEE] = TrottArray[i-1][FORELEFT_KNEE];
+        TrottArray[i][FORERIGHT_HIP] = TrottArray[i-1][FORERIGHT_HIP];
+        TrottArray[i][FORERIGHT_KNEE] = TrottArray[i-1][FORERIGHT_KNEE];
+	
         //iterate spine to stretch to move COG backward when sitting
         spineCurr += spineStep;
         TrottArray[i][SPINE_FLEX] = spineStep;
@@ -340,8 +346,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     //Setting Goals starting with Right leg forward
     LHindLeft.StartLeg(uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
     LHindRight.StartLeg(uStepLengthH+uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
-    LForeLeft.StartLeg(uStepLengthF+uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
-    LForeRight.StartLeg(uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
+    LForeLeft.StartLeg(uStepLengthF+uFrontLegStart, 0, halfMotion, CMouseLeg::Stance);
+    LForeRight.StartLeg(uFrontLegStart, 0, halfMotion, CMouseLeg::Swing);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=0; i<halfMotion; i++)
@@ -367,8 +373,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     // Setting Leg Goals starting with Left leg forward
     LHindLeft.StartLeg(uStepLengthH+uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
     LHindRight.StartLeg(uHindLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
-    LForeLeft.StartLeg(uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Swing);
-    LForeRight.StartLeg(uStepLengthF+uFrontLegStart, uWalkLevel, halfMotion, CMouseLeg::Stance);
+    LForeLeft.StartLeg(uFrontLegStart, 0, halfMotion, CMouseLeg::Swing);
+    LForeRight.StartLeg(uStepLengthF+uFrontLegStart, 0, halfMotion, CMouseLeg::Stance);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=halfMotion; i<motionlength; i++)
