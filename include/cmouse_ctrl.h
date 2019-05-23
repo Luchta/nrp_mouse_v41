@@ -130,10 +130,10 @@ private:
     void moveLeg();    
     void Print(int length = 1);
     //OBJECTS
-    CMouseLeg LForeLeft = CMouseLeg('f','l', Lift);
-    CMouseLeg LForeRight = CMouseLeg('f','r', Lift);
-    CMouseLeg LHindLeft = CMouseLeg('h','l', Lift);
-    CMouseLeg LHindRight = CMouseLeg('h','r', Lift);
+    CMouseLeg LForeLeft = CMouseLeg('f','l', Lift); //fwd=0 bkwd=180 up=0 down=180
+    CMouseLeg LForeRight = CMouseLeg('f','r', Lift);//fwd=180 bkwd=0 up=180 down=0
+    CMouseLeg LHindLeft = CMouseLeg('h','l', Lift); //fwd=0 bkwd=180 up=0 down=180
+    CMouseLeg LHindRight = CMouseLeg('h','r', Lift); //fwd=180 bkwd=0 up=180 down=0
     CSpine Spine = CSpine();
 
     //Motion Parameters
