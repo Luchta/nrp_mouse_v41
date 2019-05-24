@@ -20,6 +20,47 @@ public:
     double tail;
 };
 
+class CMove
+{
+public:
+    CMove(int min, int max, int offset, int step){
+        uRangeLeft = min;
+        uRangeRight = max;
+        uOffset = offset;
+        uStep = step;
+
+        posCentre = uMotorCentre + uOffset;
+        posFarLeft = posCentre - uRangeLeft;
+        posFarRight = posCentre + uRangeRight;
+
+        curPos = posCentre + uOffset;
+    }
+
+    virtual ~CMove() {}
+
+    double max();
+    double min();
+    double moveLeft(int length);
+    double moveRight(int length);
+    double moveStepLeft(int length);
+    double moveStepRight(int length);
+    double centre();
+
+private:
+    //Variables init in constructor
+    int uRangeLeft, uRangeRight, uOffset, uStep;
+    double posCentre, posFarLeft, posFarRight;
+    //runtime variables
+    double leftStepsize, rightStepsize, TailStepsize, curPos;
+    //state variables
+    bool dir = true;
+    bool leftStart = true;
+    bool rightStart = true;
+    //constants
+    const int uMotorCentre = 90;
+
+};
+
 class CSpine
 {
 public:
@@ -29,6 +70,8 @@ public:
 
     double stretch();
     double crouch();
+    double moveTailLeft(int length);
+    double moveTailRight(int length);
     CSpinePos moveLeft(int length);
     CSpinePos moveRight(int length);
     CSpinePos moveStepLeft(int length);
@@ -45,15 +88,19 @@ private:
     const int cOffsetFlex = 0;
     const int posCentre = 90;
     const int spineStep = 20;
-    const int posFarLeft = posCentre + cOffsetSpine - RangeLeft;
-    const int posFarRight = posCentre + cOffsetSpine + RangeRight;
-    const int posTailFarLeft = posCentre + cOffsetTail - RangeLeft;
-    const int posTailFarRight = posCentre + cOffsetTail + RangeRight;
+    const int posSpineCentre = posCentre + cOffsetSpine;
+    const int posTailCentre = posCentre + cOffsetTail;
+    const int posFarLeft = posSpineCentre - RangeLeft;
+    const int posFarRight = posSpineCentre + RangeRight;
+    const int posTailFarLeft = posTailCentre - RangeLeft;
+    const int posTailFarRight = posTailCentre + RangeRight;
 
-
+    bool dir = true;
     bool leftStart = true;
     bool rightStart = true;
-    double leftStepsize, rightStepsize;
+    bool rightTailStart = true;
+    bool leftTailStart = true;
+    double leftStepsize, rightStepsize, TailStepsize;
     int curSP = posCentre + cOffsetSpine;
     int curTL = posCentre + cOffsetTail;
 
@@ -137,12 +184,12 @@ private:
     CSpine Spine = CSpine();
 
     //Motion Parameters
-    static const int Lift = 15; //height of the foot lift
+    static const int Lift = 20; //height of the foot lift
     const int uFrontLegStart  = -10;  // x start pos. of pace
     const int uHindLegStart   = -20;
     const int uStepLengthF    = 70;  // length of one leg move on the ground
     const int uStepLengthH    = 70;  // length of one leg move on the ground
-    const int uWalkLevel      = 5;//10;  // y walking level of init and walking
+    const int uWalkLevel      = 10;//10;  // y walking level of init and walking
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
 

@@ -139,9 +139,9 @@ void CMouseRos::Publish(int length)
         msgarr.data[TAIL]=(TrottArray[i][TAIL]);
         msgarr.data[SPINE_FLEX]=(TrottArray[i][SPINE_FLEX]);
         msgarr.data[HEAD_PAN]=(TrottArray[i][HEAD_PAN]);
-	msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+        msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
 
-	//std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
+        //std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
 
         pub.publish(msgarr);
         ros::spinOnce();
@@ -257,11 +257,11 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
     }
-        int ll = 180; //leg most forward
-        int lc = 180; //coil most released
-        int changeAbsolute = leng_up - (leng_init/4);
-  
- for (i=leng_init; i<leng_up; i++)
+    int ll = 180; //leg most forward
+    int lc = 180; //coil most released
+    int changeAbsolute = leng_up - (leng_init/4);
+
+    for (i=leng_init; i<leng_up; i++)
     {
         TrottArray[i][TIMESTAMP] = i;
         //set Left hindleg to maximum forward value of leg
@@ -305,12 +305,12 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         tmpLeg = LHindRight.GetNext();
         TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
-	//keep forelegs in position
+        //keep forelegs in position
         TrottArray[i][FORELEFT_HIP] = TrottArray[i-1][FORELEFT_HIP];
         TrottArray[i][FORELEFT_KNEE] = TrottArray[i-1][FORELEFT_KNEE];
         TrottArray[i][FORERIGHT_HIP] = TrottArray[i-1][FORERIGHT_HIP];
         TrottArray[i][FORERIGHT_KNEE] = TrottArray[i-1][FORERIGHT_KNEE];
-	
+
         //iterate spine to stretch to move COG backward when sitting
         spineCurr += spineStep;
         TrottArray[i][SPINE_FLEX] = spineStep;
@@ -323,6 +323,7 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     //Variables
     int halfMotion = (int)round(motionlength/2);
     int i;
+    bool tail = true;
     CLegPos tmp;
     CSpinePos tmpSpine;
 
@@ -366,7 +367,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
         TrottArray[i][FORERIGHT_HIP] = tmp.leg;
         TrottArray[i][FORERIGHT_KNEE] = tmp.coil;
         TrottArray[i][SPINE] = tmpSpine.spine;
-        TrottArray[i][TAIL] = tmpSpine.tail;
+        if (tail) {TrottArray[i][TAIL] = Spine.moveTailLeft(halfMotion);}
+        else {TrottArray[i][TAIL] = tmpSpine.tail;}
         TrottArray[i][SPINE_FLEX] = Spine.stretch();
     }
 
@@ -393,7 +395,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
         TrottArray[i][FORERIGHT_HIP] = tmp.leg;
         TrottArray[i][FORERIGHT_KNEE] = tmp.coil;
         TrottArray[i][SPINE] = tmpSpine.spine;
-        TrottArray[i][TAIL] = tmpSpine.tail;
+        if (tail) {TrottArray[i][TAIL] = Spine.moveTailLeft(halfMotion);}
+        else {TrottArray[i][TAIL] = tmpSpine.tail;}
         TrottArray[i][SPINE_FLEX] = Spine.stretch();
     }
 
@@ -731,6 +734,61 @@ double CSpine::stretch()
 double CSpine::crouch()
 {
     return posCrouched;
+}
+
+
+//move right centre to 50 and back
+double CSpine::moveTailLeft(int length)
+{
+    //catch first function call to initialize
+    if(leftTailStart){
+        //set stepsize to got there and back again
+        TailStepsize = ((length/posTailFarLeft)/2);
+        leftTailStart = false;
+        dir = true;
+    }
+    //set new positions of the spine
+    if (dir && (curTL > posTailFarLeft)){
+        curTL += TailStepsize;  //go right
+    }else if(!dir && (curTL < posTailCentre)) {
+        curTL -= TailStepsize; //go centre
+    }else {
+        //check wether motion completed
+        if (curTL >= posTailCentre) {
+            curTL = posTailCentre;
+            leftTailStart = true;
+            return curTL;
+        }
+        dir = !dir; //change direction
+    }
+    return curTL;
+}
+
+//move right centre to 130 and back
+double CSpine::moveTailRight(int length)
+{
+    //catch first function call to initialize
+    if(rightTailStart){
+        //set stepsize to got there and back again
+        TailStepsize = ((length/posTailFarRight)/2);
+        rightTailStart = false;
+        dir = true;
+    }
+    //set new positions of the spine
+    if (dir && (curTL < posTailFarRight)){
+        curTL += TailStepsize;  //go right
+    }else if(!dir && (curTL > posTailCentre)) {
+        curTL -= TailStepsize; //go centre
+    }else {
+        //check wether motion completed
+        if (curTL <= posTailCentre) {
+            curTL = posTailCentre;
+            rightTailStart = true;
+            return curTL;
+        }
+        dir = !dir; //change direction
+    }
+    return curTL;
 }
 
 //moving the Spine and Tail smoothly during walking
