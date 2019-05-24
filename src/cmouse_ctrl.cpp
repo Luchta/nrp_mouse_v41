@@ -4,7 +4,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-// ROS Includes
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +27,7 @@
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ROS CLASS
-
+#if defined ROS
 CMouseRos::CMouseRos()
 {
     msgarr.data.resize(14); //need to declare the size, else it wont work
@@ -146,9 +145,12 @@ void CMouseRos::Publish(int length)
         pub.publish(msgarr);
         ros::spinOnce();
         loop_rate.sleep();
-
     }
 }
+
+#endif
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // UI methods
@@ -395,7 +397,7 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
         TrottArray[i][FORERIGHT_HIP] = tmp.leg;
         TrottArray[i][FORERIGHT_KNEE] = tmp.coil;
         TrottArray[i][SPINE] = tmpSpine.spine;
-        if (tail) {TrottArray[i][TAIL] = Spine.moveTailLeft(halfMotion);}
+        if (tail) {TrottArray[i][TAIL] = Spine.moveTailRight(motionlength-halfMotion);}
         else {TrottArray[i][TAIL] = tmpSpine.tail;}
         TrottArray[i][SPINE_FLEX] = Spine.stretch();
     }
@@ -489,6 +491,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
     int motionlength = 50;
     char dir = '0';
     int state = '0';
+    int cmd;
     bool OK = true;
 
     clearArr(); //set everything to 90 deg, to avoid damage.
@@ -496,43 +499,71 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
     //while(ros.OK)
     while (OK)
     {
-        dir = messages;
-        if (dir != -1){
-            state = dir;
+        cmd = messages; //just one access to messages per run - not yet atomic!!
+        if (cmd != state && cmd != 0){
+            //newArray = true;
+            state = cmd;
         }
         switch (state) {
-        case 'i':
-            Init();
+        case 'i':   //initalize pose
+            dir = stop;
             std::cout << "init" << std::endl;
-            Print();
+            messages = 0;
+            Init(3);
+            Print(3);
+            state = 'h';
             break;
-        case 'w':
-            Trot(motionlength);
+        case 'w': //walk forward
+            dir = Fwd;
             std::cout << "Straight ahead" << std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 's': //walk backward
+            dir = Bkwd;
+            std::cout<<"Backwards"<<std::endl;
+            TrotBkw(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'a': //walk left
+            dir = left;
+            std::cout<<"Left Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'd':   //walk right
+            dir = right;
+            std::cout<<"Right Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'y':   //quit programm
+            std::cout<<"Sitting"<<std::endl;
+            SitUp(80);
+            Print(80);
+            messages = 0;
+            state = 'h';
+            break;
+        case 'q':   //quit programm
+            std::cout<<"Quitting"<<std::endl;
+            clearArr();
+            Print();
+            return;
+        case 'm':   //publish motions to ros
             Print(motionlength);
             break;
-        case 'a':
-            std::cout<<"Left Turn"<<std::endl;
-            break;
-        case 's':
-            std::cout<<"Backwards"<<std::endl;
-            break;
-        case 'd':
-            std::cout<<"Right Turn"<<std::endl;
-            break;
-        case 'q':
-            std::cout<<"Quitting"<<std::endl;
-            return;
-        case 'e':
-            std::cout<<"DUMP"<<std::endl;
-            LForeLeft.Dump();
-            LForeRight.Dump();
-            LHindLeft.Dump();
-            LHindRight.Dump();
+        case 'h':   //idle
+            usleep(90);
+
             break;
         }
-
     }
+
+
 }
 
 /*
@@ -743,15 +774,17 @@ double CSpine::moveTailLeft(int length)
     //catch first function call to initialize
     if(leftTailStart){
         //set stepsize to got there and back again
-        TailStepsize = ((length/posTailFarLeft)/2);
+        TailStepsize = (((double)RangeLeft)/((double)length/2));
         leftTailStart = false;
         dir = true;
+        curTL = posTailCentre;
+        return curTL;
     }
     //set new positions of the spine
     if (dir && (curTL > posTailFarLeft)){
-        curTL += TailStepsize;  //go right
+        curTL = curTL - TailStepsize;  //go left
     }else if(!dir && (curTL < posTailCentre)) {
-        curTL -= TailStepsize; //go centre
+        curTL = curTL + TailStepsize; //go centre
     }else {
         //check wether motion completed
         if (curTL >= posTailCentre) {
@@ -770,15 +803,17 @@ double CSpine::moveTailRight(int length)
     //catch first function call to initialize
     if(rightTailStart){
         //set stepsize to got there and back again
-        TailStepsize = ((length/posTailFarRight)/2);
+        TailStepsize = (((double)RangeRight)/((double)length/2));
         rightTailStart = false;
         dir = true;
+        curTL = posTailCentre;
+        return curTL;
     }
     //set new positions of the spine
     if (dir && (curTL < posTailFarRight)){
-        curTL += TailStepsize;  //go right
+        curTL = curTL + TailStepsize;  //go right
     }else if(!dir && (curTL > posTailCentre)) {
-        curTL -= TailStepsize; //go centre
+        curTL = curTL - TailStepsize; //go centre
     }else {
         //check wether motion completed
         if (curTL <= posTailCentre) {

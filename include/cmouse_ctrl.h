@@ -4,12 +4,16 @@
 #include "kinematics.h"
 #include <thread>
 
+//#define ROS
+
+#if defined ROS
 // ROS includes
 #include "ros/ros.h"
 #include "std_msgs/MultiArrayLayout.h"
 #include "std_msgs/MultiArrayDimension.h"
 #include "std_msgs/Float64MultiArray.h"
 #include "std_msgs/Float64.h"
+#endif
 
 class CSpinePos
 {
@@ -79,8 +83,8 @@ public:
     CSpinePos centre();
 
 private:
-    const int RangeLeft = 50;
-    const int RangeRight = 130;
+    const int RangeLeft = 40;
+    const int RangeRight = 40;
     const int posStreched = 110;
     const int posCrouched = 180;
     const int cOffsetSpine = -15;
@@ -101,8 +105,8 @@ private:
     bool rightTailStart = true;
     bool leftTailStart = true;
     double leftStepsize, rightStepsize, TailStepsize;
-    int curSP = posCentre + cOffsetSpine;
-    int curTL = posCentre + cOffsetTail;
+    double curSP = posCentre + cOffsetSpine;
+    double curTL = posCentre + cOffsetTail;
 
 };
 
@@ -198,6 +202,7 @@ private:
 
 };
 
+#if defined ROS
 class CMouseRos : public CMouseCtrl
 {
 public:
@@ -215,6 +220,7 @@ private:
     ros::Publisher pub;
 
 };
+#endif
 
 class CMouseUI
 {
