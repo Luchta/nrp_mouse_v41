@@ -230,6 +230,7 @@ void CMouseCtrl::Print(int length) //print the array values for calculated lengt
 void CMouseCtrl::StopAllMotors(){
     for (int i=0;i<13;i++) {
     ProcessSpine(SetMotorOff, MotorID[i], 0, 0);
+    usleep(10000);
     }
 }
 

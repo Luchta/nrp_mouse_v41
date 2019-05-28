@@ -15,7 +15,7 @@
 #define MAX_ARG_PER_LINE 10
 
 //Debugging Mode
-#define DEBUG true
+#define DEBUG false
 
 //PUBLIC/////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -392,6 +392,7 @@ void CMouseCom::setup_uart_send()
     //	CSIZE:- CS5, CS6, CS7, CS8
     //	CLOCAL - Ignore modem status lines
     //	CREAD - Enable receiver
+    // | CRTSCTS - Flow Control
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
     //  IXOFF - Enable start/stop input control.
@@ -400,8 +401,8 @@ void CMouseCom::setup_uart_send()
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_sendstream, &options);
-    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL| IXOFF | IXON;
+    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD| CRTSCTS;		//<Set baud rate
+    options.c_iflag = IGNPAR | ICRNL;//| IXOFF | IXON;
     options.c_oflag = 0;
     // options.c_lflag = 0;
     options.c_lflag = ICANON;
@@ -449,6 +450,7 @@ void CMouseCom::setup_uart_read()
     //	CSIZE:- CS5, CS6, CS7, CS8
     //	CLOCAL - Ignore modem status lines
     //	CREAD - Enable receiver
+    //  CRTSCTS - CTS RTS Flow Control
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
     //  IXOFF - Enable start/stop input control.
@@ -457,8 +459,8 @@ void CMouseCom::setup_uart_read()
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_readstream, &options);
-    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL | IXOFF | IXON; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
+    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD | CRTSCTS;		//<Set baud rate
+    options.c_iflag = IGNPAR | ICRNL;// | IXOFF | IXON; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
     options.c_oflag = 0;
     //options.c_lflag = 0;
     options.c_lflag = ICANON;
