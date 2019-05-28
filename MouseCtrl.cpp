@@ -109,10 +109,10 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             break;
         case 's': //walk backward
             dir = Bkwd;
-            std::cout<<"Backwards"<<std::endl;
-            TrotBkw(motionlength);
+            std::cout<<"Stop Motors"<<std::endl;
+            StopAllMotors();
             messages = 0;
-            state = 'm';
+            state = 'h';
             break;
         case 'a': //walk left
             dir = left;
@@ -167,20 +167,24 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
     //TrottArray[i][TIMESTAMP]
     for(int i=0;i<length;i++)
     {
+        /*
         ProcessSpine(SetMotorPos, MotorID[ForeLeftHip], Remap(TrottArray[i][FORELEFT_HIP]), 1);
         ProcessSpine(SetMotorPos, MotorID[ForeLeftKnee], Remap(TrottArray[i][FORELEFT_KNEE]), 1);
         ProcessSpine(SetMotorPos, MotorID[ForeRightHip], Remap(TrottArray[i][FORERIGHT_HIP]), 1);
         ProcessSpine(SetMotorPos, MotorID[ForeRightKnee], Remap(TrottArray[i][FORERIGHT_KNEE]), 1);
+        */
         ProcessSpine(SetMotorPos, MotorID[HindLeftHip], Remap(TrottArray[i][HINDLEFT_HIP]), 1);
         ProcessSpine(SetMotorPos, MotorID[HindLeftKnee], Remap(TrottArray[i][HINDLEFT_KNEE]), 1);
         ProcessSpine(SetMotorPos, MotorID[HindRightHip], Remap(TrottArray[i][HINDRIGHT_HIP]), 1);
         ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
+        /*
         ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
         ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
         ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
-        usleep(100000); //testwise parameter
+        */
+        usleep(30000); //testwise parameter
     }
 }
 
@@ -222,6 +226,12 @@ void CMouseCtrl::Print(int length) //print the array values for calculated lengt
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CMouseCtrl Motions
+
+void CMouseCtrl::StopAllMotors(){
+    for (int i=0;i<13;i++) {
+    ProcessSpine(SetMotorOff, MotorID[i], 0, 0);
+    }
+}
 
 void CMouseCtrl::Init(int length) //initalizes all legs to zero position
 {

@@ -182,6 +182,7 @@ public:
     void TrotBkw(int motionlength);
     void SitUp(int length);
 
+    void StopAllMotors();
 private:
 
     //OBJECTS

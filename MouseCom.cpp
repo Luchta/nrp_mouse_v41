@@ -79,6 +79,12 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
     case SetLed:
         CMouseCom::setMotorLed(val1, val2);
         break;
+    case SetMotorOff:
+        setMotorOFF(val1);
+        break;
+    case MPwrOff:
+        setMotorPwrOFF();
+        break;
     default:
         //NOOOOOOO!
         std::cerr << "Error - Unknwon UART Send Request!" << std::endl;
@@ -124,6 +130,28 @@ void CMouseCom::setMotorLed(int id, int state)
     char buffer [18];
     //string: ":ID!L=STATE"
     l = sprintf (buffer, ":%02d!L%d\n", id, state);
+    //send
+    sendUartMessage(buffer,l);
+}
+
+void CMouseCom::setMotorOFF(int id)
+{
+    //------ form string------
+    int l;
+    char buffer [18];
+    //string: ":ID!L=STATE"
+    l = sprintf (buffer, ":%02d!P=OFF\n", id);
+    //send
+    sendUartMessage(buffer,l);
+}
+
+void CMouseCom::setMotorPwrOFF()
+{
+    //------ form string------
+    int l;
+    char buffer [18];
+    //string: ":ID!L=STATE"
+    l = sprintf (buffer, "!PS-\n");
     //send
     sendUartMessage(buffer,l);
 }

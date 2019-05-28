@@ -22,7 +22,7 @@ public:
     CMouseCom();
     virtual ~CMouseCom();
 
-    typedef enum Commmands{ SetMotorPos, PosReached, GetSensorValue, SensorValue, SetLed,   // commands spine
+    typedef enum Commmands{ SetMotorPos, PosReached, GetSensorValue, SensorValue,  SetLed, SetMotorOff, MPwrOff,   // commands spine
                             MoveLeg, StepLeg, StepDone,                                // commands rpi internal
                             InitMouse, Trott, StopAll} typCmd;                        // commands from shell
     std::atomic<Ccmnd> consoleCmnd;// for thread communication
@@ -33,6 +33,8 @@ public:
     void setConsoleCcmnd(typCmd cmd, int val1=0, int val2=0, int val3=0);
     //void ProcessSpine(typCmd cmd, int val1, int val2=0, int val3=0);
 
+    void setMotorOFF(int id);
+    void setMotorPwrOFF();
 protected:
     virtual void ProcessSpine(typCmd cmd, int val1, int val2, int val3);
     virtual CMousCtrlSet& InitRPI(){}
