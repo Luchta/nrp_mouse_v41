@@ -87,10 +87,10 @@ private:
     const int RangeRight = 40;
     const int posStreched = 110;
     const int posCrouched = 180;
-    const int cOffsetSpine = -15;
+    const int cOffsetSpine = 0;
     const int cOffsetTail = 0;
     const int cOffsetFlex = 0;
-    const int posCentre = 90;
+    const int posCentre = 180;
     const int spineStep = 20;
     const int posSpineCentre = posCentre + cOffsetSpine;
     const int posTailCentre = posCentre + cOffsetTail;

@@ -96,8 +96,8 @@ bool CMouseCom::sendMotor_Serial(int id, int pos, int speed)
 {
     //------ Calculate adequate centred Value ------
     //FIXME!!
-    int CentreOffset = 1800;
-    pos = pos + CentreOffset;
+    //int CentreOffset = 1800;
+    //pos = pos + CentreOffset;
     //------ form string ------
     int l;
     char buffer [18];

@@ -532,6 +532,7 @@ void CMouseCtrl::TrotBkw(int motionlength) //calculates trott gait moving backwa
 void CMouseCtrl::clearArr(){    //clear the TrottArray
 
     CLegPos tmpLeg;
+    int centrePos = 180;
 
     //initalize Leg motion with Right leg forward
     LHindLeft.StartLeg(0, 0, 1, CMouseLeg::Stance);
@@ -554,11 +555,11 @@ void CMouseCtrl::clearArr(){    //clear the TrottArray
         tmpLeg = LForeRight.GetNext();
         TrottArray[i][FORERIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][FORERIGHT_KNEE] = tmpLeg.coil;
-        TrottArray[i][SPINE] = 90 ;
-        TrottArray[i][TAIL] = 90 ;
-        TrottArray[i][SPINE_FLEX] = 180 ;
-        TrottArray[i][HEAD_PAN] = 90 ;
-        TrottArray[i][HEAD_TILT] = 90 ;
+        TrottArray[i][SPINE] = centrePos ;
+        TrottArray[i][TAIL] = centrePos ;
+        TrottArray[i][SPINE_FLEX] = centrePos ;
+        TrottArray[i][HEAD_PAN] = centrePos ;
+        TrottArray[i][HEAD_TILT] = centrePos ;
     }
 }
 
