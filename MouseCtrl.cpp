@@ -1,9 +1,9 @@
-#include "cmouse_ctrl.h"
+﻿#include "MouseCtrl.h"
 #include <cmath>
 #include <iostream>
 #include <termios.h>
 #include <unistd.h>
-
+#include <thread>
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,41 +25,72 @@
 
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROS CLASS
-#if defined ROS
-CMouseRos::CMouseRos()
+// UI methods
+
+void CMouseUI::process()
 {
-    msgarr.data.resize(14); //need to declare the size, else it wont work
-    pub = n.advertise<std_msgs::Float64MultiArray>("nrpmouse_servotopic", 512);
-    n.setParam("length", 50);
-    //ros::Rate loop_rate(10); //run at 10Hz, not sleep time
+    std::cout << "waiting for input\n";
+    do {
+        _msg = getch();
+        usleep(100);
+    }while (_msg != 'q');
 }
 
-//starting the loop thread
-void CMouseRos::ROSstartThread() {
-    std::cout << "starting UART and MOUSE thread"<<std::endl;
-    std::thread t1 ([=] { RosCtrl(); });
+int CMouseUI::getch()
+{
+    //a non locking getchar() which will always wait for input
+    static struct termios oldt, newt;
+    tcgetattr( STDIN_FILENO, &oldt);           // save old settings
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);                 // disable buffering
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
+    int dir = getchar();  // read character (non-blocking)
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
+    return dir;
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CMouseCtrl Methods
+CMouseCtrl::CMouseCtrl()
+{
+    clearArr();
+    startUART();
+}
+
+void CMouseCtrl::startCtrlThread() { //starting the loop thread
+    std::cout << "starting Ctrl thread"<<std::endl;
+    std::thread t1 ([=] { Ctrl(); });
+    //std::thread t1 ([=] { RosCtrl(); });
     t1.detach();
-    std::cout << "Walker thread detached"<<std::endl;
+    std::cout << "Mouse thread detached"<<std::endl;
 }
 
-void CMouseRos::RosCtrl()
+
+void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
     int motionlength = 50;
-    int cmd = '0';
+    char dir = '0';
     int state = '0';
-    //bool newArray = true;
+    int cmd;
+    bool OK = true;
+
     clearArr(); //set everything to 90 deg, to avoid damage.
 
-    while (ros::ok())
+    //while(ros.OK)
+    while (OK)
     {
         cmd = messages; //just one access to messages per run - not yet atomic!!
         if (cmd != state && cmd != 0){
             //newArray = true;
             state = cmd;
         }
-        n.param("length", motionlength, 50);
+        //n.param("length", motionlength, 50);
         switch (state) {
         case 'i':   //initalize pose
             dir = stop;
@@ -120,66 +151,77 @@ void CMouseRos::RosCtrl()
     }
 }
 
-void CMouseRos::Publish(int length)
+int CMouseCtrl::Remap(double in) //print the array values for calculated lengthss
 {
-    ros::Rate loop_rate(40); //run at 40Hz, not sleep time
-    for(int i=0;i<length;i++){
+    double maxPos = 4095;
+    //int minPos = 0;
+    double maxDeg = 360;
+    //int minDeg = 0;
+    double map = (maxPos*in)/maxDeg;
 
-        msgarr.data[TIMESTAMP] = TrottArray[i][TIMESTAMP];
-        msgarr.data[FORELEFT_HIP]=(TrottArray[i][FORELEFT_HIP]);
-        msgarr.data[FORELEFT_KNEE]=(TrottArray[i][FORELEFT_KNEE]);
-        msgarr.data[FORERIGHT_HIP]=(TrottArray[i][FORERIGHT_HIP]);
-        msgarr.data[FORERIGHT_KNEE]=(TrottArray[i][FORERIGHT_KNEE]);
-        msgarr.data[HINDLEFT_HIP]=(TrottArray[i][HINDLEFT_HIP]);
-        msgarr.data[HINDLEFT_KNEE]=(TrottArray[i][HINDLEFT_KNEE]);
-        msgarr.data[HINDRIGHT_HIP]=(TrottArray[i][HINDRIGHT_HIP]);
-        msgarr.data[HINDRIGHT_KNEE]=(TrottArray[i][HINDRIGHT_KNEE]);
-        msgarr.data[SPINE]=(TrottArray[i][SPINE]);
-        msgarr.data[TAIL]=(TrottArray[i][TAIL]);
-        msgarr.data[SPINE_FLEX]=(TrottArray[i][SPINE_FLEX]);
-        msgarr.data[HEAD_PAN]=(TrottArray[i][HEAD_PAN]);
-        msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+    return (int)std::abs(map);
+}
 
-        //std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
-
-        pub.publish(msgarr);
-        ros::spinOnce();
-        loop_rate.sleep();
+void CMouseCtrl::Publish(int length) //print the array values for calculated lengthss
+{
+    //TrottArray[i][TIMESTAMP]
+    for(int i=0;i<length;i++)
+    {
+        ProcessSpine(SetMotorPos, MotorID[ForeLeftHip], Remap(TrottArray[i][FORELEFT_HIP]), 1);
+        ProcessSpine(SetMotorPos, MotorID[ForeLeftKnee], Remap(TrottArray[i][FORELEFT_KNEE]), 1);
+        ProcessSpine(SetMotorPos, MotorID[ForeRightHip], Remap(TrottArray[i][FORERIGHT_HIP]), 1);
+        ProcessSpine(SetMotorPos, MotorID[ForeRightKnee], Remap(TrottArray[i][FORERIGHT_KNEE]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HindLeftHip], Remap(TrottArray[i][HINDLEFT_HIP]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HindLeftKnee], Remap(TrottArray[i][HINDLEFT_KNEE]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HindRightHip], Remap(TrottArray[i][HINDRIGHT_HIP]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
+        ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
+        ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
+        ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
+        ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
+        usleep(100000); //testwise parameter
     }
 }
 
-#endif
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// UI methods
-
-void CMouseUI::process()
+void CMouseCtrl::Print(int length) //print the array values for calculated lengthss
 {
+    std::cout << "TIMESTAMP; "
+              << "FORELEFT_HIP; "
+              << "FORELEFT_KNEE; "
+              << "FORERIGHT_HIP; "
+              << "FORERIGHT_KNEE; "
+              << "HINDLEFT_HIP; "
+              << "HINDLEFT_KNEE; "
+              << "HINDRIGHT_HIP; "
+              << "HINDRIGHT_KNEE; "
+              << "SPINE; "
+              << "TAIL; "
+              << "SPINE_FLEX; "
+              << "HEAD_PAN; "
+              << "HEAD_TILT \n ";
 
-    do {
-        _msg = getch();
-        usleep(100);
-    }while (_msg != 'q');
+    for(int i=0;i<length;i++)
+    {
+        std::cout << (int)TrottArray[i][TIMESTAMP] << "; "
+                  << (int)TrottArray[i][FORELEFT_HIP] << "; "
+                  << (int)TrottArray[i][FORELEFT_KNEE] << "; "
+                  << (int)TrottArray[i][FORERIGHT_HIP] << "; "
+                  << (int)TrottArray[i][FORERIGHT_KNEE] << "; "
+                  << (int)TrottArray[i][HINDLEFT_HIP] << "; "
+                  << (int)TrottArray[i][HINDLEFT_KNEE] << "; "
+                  << (int)TrottArray[i][HINDRIGHT_HIP] << "; "
+                  << (int)TrottArray[i][HINDRIGHT_KNEE] << "; "
+                  << (int)TrottArray[i][SPINE] << "; "
+                  << (int)TrottArray[i][TAIL] << "; "
+                  << (int)TrottArray[i][SPINE_FLEX] << "; "
+                  << (int)TrottArray[i][HEAD_PAN] << "; "
+                  << (int)TrottArray[i][HEAD_TILT] << "\n ";
+    }
 }
 
-int CMouseUI::getch()
-{
-    //a non locking getchar() which will always wait for input
-    static struct termios oldt, newt;
-    tcgetattr( STDIN_FILENO, &oldt);           // save old settings
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON);                 // disable buffering
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
-    int dir = getchar();  // read character (non-blocking)
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
-    return dir;
-
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CMouseCtrl Methods
+// CMouseCtrl Motions
 
 void CMouseCtrl::Init(int length) //initalizes all legs to zero position
 {
@@ -486,142 +528,6 @@ void CMouseCtrl::TrotBkw(int motionlength) //calculates trott gait moving backwa
 
 }
 
-void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
-{
-    int motionlength = 50;
-    char dir = '0';
-    int state = '0';
-    int cmd;
-    bool OK = true;
-
-    clearArr(); //set everything to 90 deg, to avoid damage.
-
-    //while(ros.OK)
-    while (OK)
-    {
-        cmd = messages; //just one access to messages per run - not yet atomic!!
-        if (cmd != state && cmd != 0){
-            //newArray = true;
-            state = cmd;
-        }
-        switch (state) {
-        case 'i':   //initalize pose
-            dir = stop;
-            std::cout << "init" << std::endl;
-            messages = 0;
-            Init(3);
-            Print(3);
-            state = 'h';
-            break;
-        case 'w': //walk forward
-            dir = Fwd;
-            std::cout << "Straight ahead" << std::endl;
-            Trot(motionlength);
-            messages = 0;
-            state = 'm';
-            break;
-        case 's': //walk backward
-            dir = Bkwd;
-            std::cout<<"Backwards"<<std::endl;
-            TrotBkw(motionlength);
-            messages = 0;
-            state = 'm';
-            break;
-        case 'a': //walk left
-            dir = left;
-            std::cout<<"Left Turn"<<std::endl;
-            Trot(motionlength);
-            messages = 0;
-            state = 'm';
-            break;
-        case 'd':   //walk right
-            dir = right;
-            std::cout<<"Right Turn"<<std::endl;
-            Trot(motionlength);
-            messages = 0;
-            state = 'm';
-            break;
-        case 'y':   //quit programm
-            std::cout<<"Sitting"<<std::endl;
-            SitUp(80);
-            Print(80);
-            messages = 0;
-            state = 'h';
-            break;
-        case 'q':   //quit programm
-            std::cout<<"Quitting"<<std::endl;
-            clearArr();
-            Print();
-            return;
-        case 'm':   //publish motions to ros
-            Print(motionlength);
-            break;
-        case 'h':   //idle
-            usleep(90);
-
-            break;
-        }
-    }
-
-
-}
-
-/*
-int CMouseCtrl::getch()
-{
-    int c = std::cin.peek();
-
-    if (c == EOF){
-        return -1;
-    }else{
-    //a non blocking getchar()
-    static struct termios oldt, newt;
-    tcgetattr( STDIN_FILENO, &oldt);           // save old settings
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON);                 // disable buffering
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
-    int dir = getchar();  // read character (non-blocking)
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
-    return dir;
-    }
-}
-*/
-
-void CMouseCtrl::Print(int length) //print the array values for calculated lengthss
-{
-    std::cout << "TIMESTAMP; "
-              << "FORELEFT_HIP; "
-              << "FORELEFT_KNEE; "
-              << "FORERIGHT_HIP; "
-              << "FORERIGHT_KNEE; "
-              << "HINDLEFT_HIP; "
-              << "HINDLEFT_KNEE; "
-              << "HINDRIGHT_HIP; "
-              << "HINDRIGHT_KNEE; "
-              << "SPINE; "
-              << "TAIL; "
-              << "SPINE_FLEX; "
-              << "HEAD_PAN; "
-              << "HEAD_TILT \n ";
-
-    for(int i=0;i<length;i++)
-    {
-        std::cout << (int)TrottArray[i][TIMESTAMP] << "; "
-                  << (int)TrottArray[i][FORELEFT_HIP] << "; "
-                  << (int)TrottArray[i][FORELEFT_KNEE] << "; "
-                  << (int)TrottArray[i][FORERIGHT_HIP] << "; "
-                  << (int)TrottArray[i][FORERIGHT_KNEE] << "; "
-                  << (int)TrottArray[i][HINDLEFT_HIP] << "; "
-                  << (int)TrottArray[i][HINDLEFT_KNEE] << "; "
-                  << (int)TrottArray[i][HINDRIGHT_HIP] << "; "
-                  << (int)TrottArray[i][HINDRIGHT_KNEE] << "; "
-                  << (int)TrottArray[i][SPINE] << "; "
-                  << (int)TrottArray[i][TAIL] << "; "
-                  << (int)TrottArray[i][SPINE_FLEX] << "; "
-                  << (int)TrottArray[i][HEAD_PAN] << "; "
-                  << (int)TrottArray[i][HEAD_TILT] << "\n ";
-    }
-}
 
 void CMouseCtrl::clearArr(){    //clear the TrottArray
 
@@ -656,13 +562,7 @@ void CMouseCtrl::clearArr(){    //clear the TrottArray
     }
 }
 
-void CMouseCtrl::startThread() { //starting the loop thread
-    std::cout << "starting UART and MOUSE thread"<<std::endl;
-    std::thread t1 ([=] { Ctrl(); });
-    //t1 = std::thread { [] { Ctrl {} (); } };
-    t1.detach();
-    std::cout << "Walker thread detached"<<std::endl;
-}
+
 
 
 
@@ -881,7 +781,130 @@ CSpinePos CSpine::centre()
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ROS CLASS
+#if defined ROS
+CMouseRos::CMouseRos()
+{
+    msgarr.data.resize(14); //need to declare the size, else it wont work
+    pub = n.advertise<std_msgs::Float64MultiArray>("nrpmouse_servotopic", 512);
+    n.setParam("length", 50);
+    //ros::Rate loop_rate(10); //run at 10Hz, not sleep time
+}
 
+//starting the loop thread
+void CMouseRos::ROSstartThread() {
+    std::cout << "starting UART and MOUSE thread"<<std::endl;
+    std::thread t1 ([=] { RosCtrl(); });
+    t1.detach();
+    std::cout << "Walker thread detached"<<std::endl;
+}
+
+void CMouseRos::RosCtrl()
+{
+    int motionlength = 50;
+    int cmd = '0';
+    int state = '0';
+    //bool newArray = true;
+    clearArr(); //set everything to 90 deg, to avoid damage.
+
+    while (ros::ok())
+    {
+        cmd = messages; //just one access to messages per run - not yet atomic!!
+        if (cmd != state && cmd != 0){
+            //newArray = true;
+            state = cmd;
+        }
+        n.param("length", motionlength, 50);
+        switch (state) {
+        case 'i':   //initalize pose
+            dir = stop;
+            std::cout << "init" << std::endl;
+            messages = 0;
+            Init(3);
+            Publish(3);
+            state = 'h';
+            break;
+        case 'w': //walk forward
+            dir = Fwd;
+            std::cout << "Straight ahead" << std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 's': //walk backward
+            dir = Bkwd;
+            std::cout<<"Backwards"<<std::endl;
+            TrotBkw(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'a': //walk left
+            dir = left;
+            std::cout<<"Left Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'd':   //walk right
+            dir = right;
+            std::cout<<"Right Turn"<<std::endl;
+            Trot(motionlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'y':   //quit programm
+            std::cout<<"Sitting"<<std::endl;
+            SitUp(80);
+            Publish(80);
+            messages = 0;
+            state = 'h';
+            break;
+        case 'q':   //quit programm
+            std::cout<<"Quitting"<<std::endl;
+            clearArr();
+            Publish();
+            return;
+        case 'm':   //publish motions to ros
+            Publish(motionlength);
+            break;
+        case 'h':   //idle
+            usleep(90);
+
+            break;
+        }
+    }
+}
+
+void CMouseRos::Publish(int length)
+{
+    ros::Rate loop_rate(40); //run at 40Hz, not sleep time
+    for(int i=0;i<length;i++){
+
+        msgarr.data[TIMESTAMP] = TrottArray[i][TIMESTAMP];
+        msgarr.data[FORELEFT_HIP]=(TrottArray[i][FORELEFT_HIP]);
+        msgarr.data[FORELEFT_KNEE]=(TrottArray[i][FORELEFT_KNEE]);
+        msgarr.data[FORERIGHT_HIP]=(TrottArray[i][FORERIGHT_HIP]);
+        msgarr.data[FORERIGHT_KNEE]=(TrottArray[i][FORERIGHT_KNEE]);
+        msgarr.data[HINDLEFT_HIP]=(TrottArray[i][HINDLEFT_HIP]);
+        msgarr.data[HINDLEFT_KNEE]=(TrottArray[i][HINDLEFT_KNEE]);
+        msgarr.data[HINDRIGHT_HIP]=(TrottArray[i][HINDRIGHT_HIP]);
+        msgarr.data[HINDRIGHT_KNEE]=(TrottArray[i][HINDRIGHT_KNEE]);
+        msgarr.data[SPINE]=(TrottArray[i][SPINE]);
+        msgarr.data[TAIL]=(TrottArray[i][TAIL]);
+        msgarr.data[SPINE_FLEX]=(TrottArray[i][SPINE_FLEX]);
+        msgarr.data[HEAD_PAN]=(TrottArray[i][HEAD_PAN]);
+        msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+
+        //std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
+
+        pub.publish(msgarr);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+}
+
+#endif
 
 
 

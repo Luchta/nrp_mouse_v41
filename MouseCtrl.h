@@ -1,12 +1,12 @@
 #ifndef CMOUSE_CTRL_H
 #define CMOUSE_CTRL_H
 
-#include "kinematics.h"
-#include <thread>
+#include "Kinematics.h"
+#include "MouseCom.h"
+//#include <thread>
 
-//#define ROS
 
-#if defined ROS
+#ifdef ROS
 // ROS includes
 #include "ros/ros.h"
 #include "std_msgs/MultiArrayLayout.h"
@@ -148,20 +148,11 @@ private:
   char side;
 };
 
-class CMouseCtrl
+class CMouseCtrl : public CMouseCom
 {
 public:
-    CMouseCtrl() {clearArr();}
-    virtual ~CMouseCtrl() {}
-    //FUNCTIONS
-    //control
-    void Ctrl();
-    void startThread();
-    //walking
-    void clearArr();
-    void Trot(int motionlength);
-    void Init(int length = 1);
-    void TrotBkw(int motionlength);
+    CMouseCtrl();
+    virtual ~CMouseCtrl() {}  
 
     //VARIABLES
     int messages; // message to UI thread
@@ -170,16 +161,29 @@ public:
     static const int Motors = 13;
     double TrottArray[ArrayBuffer][Motors+1];
 
+    int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
+    typedef enum Motors{ForeLeftHip, ForeLeftKnee,
+                       HindLeftHip, HindLeftKnee,
+                       ForeRightHip, ForeRightKnee,
+                       HindRightHip, HindRightKnee,
+                       SpineFlex, SpineRot, TailRot, HeadTurn, HeadNod} typMotor;
+
     typedef enum Direction{ Fwd, Bkwd, left, right, stop, stance} typDir;
     typDir dir = stop;
 
-
-    void SitUp(int length);
-private:
     //FUNCTIONS
-    void TrotRight();
-    void moveLeg();    
-    void Print(int length = 1);
+    //control
+    void Ctrl();
+    void startCtrlThread();
+    //walking
+    void clearArr();
+    void Trot(int motionlength);
+    void Init(int length = 1);
+    void TrotBkw(int motionlength);
+    void SitUp(int length);
+
+private:
+
     //OBJECTS
     CMouseLeg LForeLeft = CMouseLeg('f','l', Lift); //fwd=0 bkwd=180 up=0 down=180
     CMouseLeg LForeRight = CMouseLeg('f','r', Lift);//fwd=180 bkwd=0 up=180 down=0
@@ -200,9 +204,15 @@ private:
 
     double MotionArray[ArrayBuffer][Motors+1];
 
+    //FUNCTIONS
+    void TrotRight();
+    void moveLeg();
+    void Print(int length = 1);
+    void Publish(int length = 1);
+    int Remap(double in);
 };
 
-#if defined ROS
+#ifdef ROS
 class CMouseRos : public CMouseCtrl
 {
 public:
