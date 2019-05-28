@@ -394,12 +394,14 @@ void CMouseCom::setup_uart_send()
     //	CREAD - Enable receiver
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
+    //  IXOFF - Enable start/stop input control.
+    //  IXON - Enable start/stop output control.
     //	PARENB - Parity enable
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_sendstream, &options);
     options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL;
+    options.c_iflag = IGNPAR | ICRNL| IXOFF | IXON;
     options.c_oflag = 0;
     // options.c_lflag = 0;
     options.c_lflag = ICANON;
@@ -449,12 +451,14 @@ void CMouseCom::setup_uart_read()
     //	CREAD - Enable receiver
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
+    //  IXOFF - Enable start/stop input control.
+    //  IXON - Enable start/stop output control.
     //	PARENB - Parity enable
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_readstream, &options);
     options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
+    options.c_iflag = IGNPAR | ICRNL | IXOFF | IXON; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
     options.c_oflag = 0;
     //options.c_lflag = 0;
     options.c_lflag = ICANON;
