@@ -1,6 +1,6 @@
-# NRP_Mouse V4 - standard Servo Version
+# NRP_Mouse V4 - standard Servo Version - No Feedback
 
-Control Software for remote control of the NRP Robot Mouse
+Control Software for remote control of the NRP Robot Mouse.
 
 ## Prerequisites
 
