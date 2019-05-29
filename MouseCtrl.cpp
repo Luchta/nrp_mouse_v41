@@ -283,6 +283,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     int i, leng_init, leng_up;
     CLegPos tmpLeg;
     CSpinePos tmpSpine;
+    double ll = 180; //leg most forward
+    double lc = 180; //coil most released
 
     //caculate array segmentation
     // left leg to start - right leg to start - Spine to fix + Sit up
@@ -298,8 +300,9 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     //initalize Leg motion with Right leg forward
     LForeLeft.StartLeg(uFrontLegStart+uStepLengthF, 0, leng_init, CMouseLeg::Stance);
     LForeRight.StartLeg(uFrontLegStart+uStepLengthF, 0, leng_init, CMouseLeg::Stance);
-    LHindLeft.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Swing);
+    LHindLeft.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Stance);
     LHindRight.StartLeg(uSitting_x, uSitting_y, leng_init, CMouseLeg::Stance);
+
 
     //calculate Servo Values and write the points to TrottArray
     for (i=0; i<leng_init; i++)
@@ -313,9 +316,10 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         tmpLeg = LHindLeft.GetNext();
         TrottArray[i][HINDLEFT_HIP] = tmpLeg.leg;
         TrottArray[i][HINDLEFT_KNEE] = tmpLeg.coil;
+        ll = tmpLeg.leg;
+        lc = tmpLeg.coil;
     }
-    int ll = 180; //leg most forward
-    int lc = 180; //coil most released
+
     int changeAbsolute = leng_up - (leng_init/4);
 
     for (i=leng_init; i<leng_up; i++)
@@ -328,14 +332,17 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][FORERIGHT_HIP] = TrottArray[i-1][FORERIGHT_HIP];
         TrottArray[i][FORERIGHT_KNEE] = TrottArray[i-1][FORERIGHT_KNEE];
         // move Right hindleg forward until almost done, then move to absolute max
-        if (i < changeAbsolute)
+       if (i < changeAbsolute)
         {
             tmpLeg = LHindRight.GetNext();
             TrottArray[i][HINDRIGHT_HIP] = tmpLeg.leg;
             TrottArray[i][HINDRIGHT_KNEE] = tmpLeg.coil;
+            ll = tmpLeg.leg;
+            lc = tmpLeg.coil;
+
         }else{
-            TrottArray[i][HINDRIGHT_HIP] = 180;
-            TrottArray[i][HINDRIGHT_KNEE] = 0;
+            TrottArray[i][HINDRIGHT_HIP] = ll;
+            TrottArray[i][HINDRIGHT_KNEE] = lc;
         }
         //move foreleft leg in stance position
         tmpLeg = LForeLeft.GetNext();
