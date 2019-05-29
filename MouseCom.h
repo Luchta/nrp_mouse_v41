@@ -22,7 +22,7 @@ public:
     CMouseCom();
     virtual ~CMouseCom();
 
-    typedef enum Commmands{ SetMotorPos, PosReached, GetSensorValue, SensorValue,  SetLed, SetMotorOff, MPwrOff,   // commands spine
+    typedef enum Commmands{ SetMotorPos, PosReached, GetSensorValue, SensorValue, SetLed, SetMotorOff, MPwrOff,   // commands spine
                             MoveLeg, StepLeg, StepDone,                                // commands rpi internal
                             InitMouse, Trott, StopAll} typCmd;                        // commands from shell
     std::atomic<Ccmnd> consoleCmnd;// for thread communication
@@ -31,12 +31,16 @@ public:
     void startThread();
     void startUART();
     void setConsoleCcmnd(typCmd cmd, int val1=0, int val2=0, int val3=0);
-    //void ProcessSpine(typCmd cmd, int val1, int val2=0, int val3=0);
+    void ProcessSpine(typCmd cmd, int val1, int val2=0, int val3=0);
 
+    //OLD COMMUNICATION
     void setMotorOFF(int id);
     void setMotorPwrOFF();
+    void sendNL();
+
+    void MotorPwrCycle();
 protected:
-    virtual void ProcessSpine(typCmd cmd, int val1, int val2, int val3);
+    //virtual void ProcessSpine(typCmd cmd, int val1, int val2, int val3);
     virtual CMousCtrlSet& InitRPI(){}
     virtual void ReceiveMsg(typCmd cmd, int val1=0, int val2=0, int val3=0) {}
 
@@ -56,6 +60,7 @@ private:
     void setMotorLed(int id, int state); //0,1,2
     bool sendStreamRequest(int id, int frequency, int amount);
     bool sendSensorRequest(int id);
+
     //recieve returns amount of arguments, 0 for nothing to read, -1 for error
     int recieveData(); // give array with MAX_ARG_LENGTH
     void checkComndConsole();

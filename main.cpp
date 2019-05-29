@@ -13,6 +13,9 @@ int main()
 
     Mouse.startCtrlThread();
 
+    Mouse.sendNL();
+    usleep(10000);
+
     //usleep(200000);
     UI.process();
 

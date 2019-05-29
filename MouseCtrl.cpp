@@ -184,7 +184,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
         */
-        usleep(30000); //testwise parameter
+        usleep(10000); //testwise parameter
     }
 }
 

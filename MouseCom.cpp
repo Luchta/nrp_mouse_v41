@@ -15,7 +15,7 @@
 #define MAX_ARG_PER_LINE 10
 
 //Debugging Mode
-#define DEBUG false
+#define DEBUG true
 
 //PUBLIC/////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +45,11 @@ void CMouseCom::startUART()
 {
     if(DEBUG){std::cout << "Setting up UART Interface\n";}
     setup_uart_read();
+    usleep(100000);
     setup_uart_send();
+    usleep(100000);
+    sendNL();//flush the buffer, all new
+    usleep(10000);
 }
 
 void CMouseCom::setConsoleCcmnd(typCmd cmd, int val1, int val2, int val3){
@@ -71,7 +75,7 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
     switch (cmd)
     {
     case SetMotorPos:
-        CMouseCom::sendMotor_Serial(val1, val2, val3); //takes ID, Pos, Speed
+        CMouseCom::sendMotor_Serial(val1, val2, val3); //takes ID, Pos, Duration
         break;
     case GetSensorValue:
         CMouseCom::sendSensorRequest(val1); //only takes ID
@@ -145,6 +149,18 @@ void CMouseCom::setMotorOFF(int id)
     sendUartMessage(buffer,l);
 }
 
+void CMouseCom::sendNL()
+{
+    //------ form string------
+    int l;
+    char buffer [18];
+    //string: ":ID!L=STATE"
+    l = sprintf (buffer, "\n");
+    //send
+    sendUartMessage(buffer,l);
+}
+
+
 void CMouseCom::setMotorPwrOFF()
 {
     //------ form string------
@@ -152,6 +168,21 @@ void CMouseCom::setMotorPwrOFF()
     char buffer [18];
     //string: ":ID!L=STATE"
     l = sprintf (buffer, "!PS-\n");
+    //send
+    sendUartMessage(buffer,l);
+}
+
+void CMouseCom::MotorPwrCycle()
+{
+    //------ form string------
+    int l;
+    char buffer [18];
+    //string: ":ID!L=STATE"
+    l = sprintf (buffer, "!PS-\n");
+    //send
+    sendUartMessage(buffer,l);
+    usleep(500000);
+    l = sprintf (buffer, "!PS+\n");
     //send
     sendUartMessage(buffer,l);
 }
@@ -181,6 +212,8 @@ bool CMouseCom::sendUartMessage(char buffer[], int l){
     {
         int count = write(uart0_sendstream, &buffer[0], l);		//Filestream, bytes to write, number of bytes to write
         //int count = write(uart0_filestream, &tx_buffer[0], (p_tx_buffer - &tx_buffer[0])); //Filestream, bytes to write, number of bytes to write
+        //FIXME!
+        usleep(10000); //safety delay to avoid collisions
         if (count < 0)
         {
             //printf("UART TX error\n");
@@ -392,17 +425,14 @@ void CMouseCom::setup_uart_send()
     //	CSIZE:- CS5, CS6, CS7, CS8
     //	CLOCAL - Ignore modem status lines
     //	CREAD - Enable receiver
-    // | CRTSCTS - Flow Control
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
-    //  IXOFF - Enable start/stop input control.
-    //  IXON - Enable start/stop output control.
     //	PARENB - Parity enable
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_sendstream, &options);
-    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD| CRTSCTS;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL;//| IXOFF | IXON;
+    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD | CRTSCTS;;		//<Set baud rate
+    options.c_iflag = IGNPAR | ICRNL;
     options.c_oflag = 0;
     // options.c_lflag = 0;
     options.c_lflag = ICANON;
@@ -450,17 +480,14 @@ void CMouseCom::setup_uart_read()
     //	CSIZE:- CS5, CS6, CS7, CS8
     //	CLOCAL - Ignore modem status lines
     //	CREAD - Enable receiver
-    //  CRTSCTS - CTS RTS Flow Control
     //	IGNPAR = Ignore characters with parity errors
     //	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
-    //  IXOFF - Enable start/stop input control.
-    //  IXON - Enable start/stop output control.
     //	PARENB - Parity enable
     //	PARODD - Odd parity (else even)
     struct termios options;
     tcgetattr(uart0_readstream, &options);
-    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD | CRTSCTS;		//<Set baud rate
-    options.c_iflag = IGNPAR | ICRNL;// | IXOFF | IXON; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
+    options.c_cflag = B1000000 | CS8 | CLOCAL | CREAD | CRTSCTS;;		//<Set baud rate
+    options.c_iflag = IGNPAR | ICRNL; //ICRNL needed for putty and minicom else RPI will not recieve \n, do not know why!!!!
     options.c_oflag = 0;
     //options.c_lflag = 0;
     options.c_lflag = ICANON;
