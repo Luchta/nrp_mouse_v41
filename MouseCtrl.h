@@ -140,10 +140,11 @@ private:
   CKoord docu[100]; //docu array
 
   //VARIABLES
-  double vx, vy;   // vector from current to destination x/y-point, divided by step stepcount
+  double vx, vy, riseStep;   // vector from current to destination x/y-point, divided by step stepcount
   int  stepcount,  // number of kinematic-steps
        step,       // current step number
-       pawLift;
+       pawLift,     // how high does the leg lift
+       risetime;    //time till the leg is lifted/set down
   char leg;    // Motor id of hip motor (knee++)
   char side;
 };
@@ -186,18 +187,20 @@ public:
 private:
 
     //OBJECTS
-    CMouseLeg LForeLeft = CMouseLeg('f','l', Lift); //fwd=0 bkwd=180 up=0 down=180
-    CMouseLeg LForeRight = CMouseLeg('f','r', Lift);//fwd=180 bkwd=0 up=180 down=0
-    CMouseLeg LHindLeft = CMouseLeg('h','l', Lift); //fwd=0 bkwd=180 up=0 down=180
-    CMouseLeg LHindRight = CMouseLeg('h','r', Lift); //fwd=180 bkwd=0 up=180 down=0
+    CMouseLeg LForeLeft = CMouseLeg('f','l', FLift); //fwd=0 bkwd=180 up=0 down=180
+    CMouseLeg LForeRight = CMouseLeg('f','r', FLift);//fwd=180 bkwd=0 up=180 down=0
+    CMouseLeg LHindLeft = CMouseLeg('h','l', HLift); //fwd=0 bkwd=180 up=0 down=180
+    CMouseLeg LHindRight = CMouseLeg('h','r', HLift); //fwd=180 bkwd=0 up=180 down=0
     CSpine Spine = CSpine();
 
     //Motion Parameters
-    static const int Lift = 20; //height of the foot lift
+    static const int FLift = 25; //height of the foot lift
+    static const int HLift = 20; //height of the foot lift
+
     const int uFrontLegStart  = -10;  // x start pos. of pace
     const int uHindLegStart   = -20;
-    const int uStepLengthF    = 70;  // length of one leg move on the ground
-    const int uStepLengthH    = 70;  // length of one leg move on the ground
+    const int uStepLengthF    = 60;  // length of one leg move on the ground
+    const int uStepLengthH    = 60;  // length of one leg move on the ground
     const int uWalkLevel      = 10;//10;  // y walking level of init and walking
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting

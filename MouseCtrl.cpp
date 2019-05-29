@@ -26,7 +26,7 @@
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-
+#define DEBUG false
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +61,7 @@ CMouseCtrl::CMouseCtrl()
 {
     clearArr();
     startUART();
+    if (DEBUG) {std::cout<<"Mouse Ctrl in Debug Mode\n";}
 }
 
 void CMouseCtrl::startCtrlThread() { //starting the loop thread
@@ -164,27 +165,28 @@ int CMouseCtrl::Remap(double in) //print the array values for calculated lengths
 
 void CMouseCtrl::Publish(int length) //print the array values for calculated lengthss
 {
-    //TrottArray[i][TIMESTAMP]
-    for(int i=0;i<length;i++)
-    {
-        /*
-        ProcessSpine(SetMotorPos, MotorID[ForeLeftHip], Remap(TrottArray[i][FORELEFT_HIP]), 1);
-        ProcessSpine(SetMotorPos, MotorID[ForeLeftKnee], Remap(TrottArray[i][FORELEFT_KNEE]), 1);
-        ProcessSpine(SetMotorPos, MotorID[ForeRightHip], Remap(TrottArray[i][FORERIGHT_HIP]), 1);
-        ProcessSpine(SetMotorPos, MotorID[ForeRightKnee], Remap(TrottArray[i][FORERIGHT_KNEE]), 1);
-        */
-        ProcessSpine(SetMotorPos, MotorID[HindLeftHip], Remap(TrottArray[i][HINDLEFT_HIP]), 1);
-        ProcessSpine(SetMotorPos, MotorID[HindLeftKnee], Remap(TrottArray[i][HINDLEFT_KNEE]), 1);
-        ProcessSpine(SetMotorPos, MotorID[HindRightHip], Remap(TrottArray[i][HINDRIGHT_HIP]), 1);
-        ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
-        /*
-        ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
-        ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
-        ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
+    if (DEBUG) Print(length);
+    else {
+        //TrottArray[i][TIMESTAMP]
+        for(int i=0;i<length;i++)
+        {
+            ProcessSpine(SetMotorPos, MotorID[ForeLeftHip], Remap(TrottArray[i][FORELEFT_HIP]), 1);
+            ProcessSpine(SetMotorPos, MotorID[ForeLeftKnee], Remap(TrottArray[i][FORELEFT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, MotorID[ForeRightHip], Remap(TrottArray[i][FORERIGHT_HIP]), 1);
+            ProcessSpine(SetMotorPos, MotorID[ForeRightKnee], Remap(TrottArray[i][FORERIGHT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, MotorID[HindLeftHip], Remap(TrottArray[i][HINDLEFT_HIP]), 1);
+            ProcessSpine(SetMotorPos, MotorID[HindLeftKnee], Remap(TrottArray[i][HINDLEFT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, MotorID[HindRightHip], Remap(TrottArray[i][HINDRIGHT_HIP]), 1);
+            ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
+            ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
+            ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
+            /*
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
         */
-        usleep(10000); //testwise parameter
+            usleep(10000); //testwise parameter
+        }
     }
 }
 
@@ -207,19 +209,19 @@ void CMouseCtrl::Print(int length) //print the array values for calculated lengt
 
     for(int i=0;i<length;i++)
     {
-        std::cout << (int)TrottArray[i][TIMESTAMP] << "; "
-                  << (int)TrottArray[i][FORELEFT_HIP] << "; "
-                  << (int)TrottArray[i][FORELEFT_KNEE] << "; "
-                  << (int)TrottArray[i][FORERIGHT_HIP] << "; "
-                  << (int)TrottArray[i][FORERIGHT_KNEE] << "; "
-                  << (int)TrottArray[i][HINDLEFT_HIP] << "; "
-                  << (int)TrottArray[i][HINDLEFT_KNEE] << "; "
-                  << (int)TrottArray[i][HINDRIGHT_HIP] << "; "
-                  << (int)TrottArray[i][HINDRIGHT_KNEE] << "; "
-                  << (int)TrottArray[i][SPINE] << "; "
-                  << (int)TrottArray[i][TAIL] << "; "
-                  << (int)TrottArray[i][SPINE_FLEX] << "; "
-                  << (int)TrottArray[i][HEAD_PAN] << "; "
+        std::cout << (int)TrottArray[i][TIMESTAMP] << "; FH:"
+                  << (int)TrottArray[i][FORELEFT_HIP] << "; FK:"
+                  << (int)TrottArray[i][FORELEFT_KNEE] << "; FH:"
+                  << (int)TrottArray[i][FORERIGHT_HIP] << "; FK:"
+                  << (int)TrottArray[i][FORERIGHT_KNEE] << "; HH:"
+                  << (int)TrottArray[i][HINDLEFT_HIP] << "; HK:"
+                  << (int)TrottArray[i][HINDLEFT_KNEE] << "; HH:"
+                  << (int)TrottArray[i][HINDRIGHT_HIP] << "; HK:"
+                  << (int)TrottArray[i][HINDRIGHT_KNEE] << "; SP:"
+                  << (int)TrottArray[i][SPINE] << "; T:"
+                  << (int)TrottArray[i][TAIL] << "; SF:"
+                  << (int)TrottArray[i][SPINE_FLEX] << "; HP:"
+                  << (int)TrottArray[i][HEAD_PAN] << "; HT: "
                   << (int)TrottArray[i][HEAD_TILT] << "\n ";
     }
 }
@@ -229,8 +231,8 @@ void CMouseCtrl::Print(int length) //print the array values for calculated lengt
 
 void CMouseCtrl::StopAllMotors(){
     for (int i=0;i<13;i++) {
-    ProcessSpine(SetMotorOff, MotorID[i], 0, 0);
-    usleep(10000);
+        ProcessSpine(SetMotorOff, MotorID[i], 0, 0);
+        usleep(10000);
     }
 }
 
@@ -587,6 +589,10 @@ void CMouseLeg::StartLeg(double x, double y, int length, typPhase phase)
     //length is the length of the array to be filled = number of steps
     stepcount = length;
     currPhase = phase;
+    if (phase == Swing){
+        risetime = (int)round((double)length/10);
+        riseStep = pawLift/risetime;
+    }
     StepStart(x,y);
 }
 
@@ -645,7 +651,18 @@ bool CMouseLeg::StepNext()
 CLegPos CMouseLeg::NextWayPoint()
 {
     double X = ptLeg.x+vx, Y = ptLeg.y+vy;        // N�chsten Punkt ab current ptLeg errechnen
-    if (currPhase == Swing && step > 0 && step<stepcount-1) Y += pawLift;  // Rueckweg; 1 cm anheben, letzter Step wieder runter
+    if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1))){
+        if (step < risetime){                       //leg rises
+            Y += riseStep*step;                     //rise stepwise with time
+        }else if (step > (stepcount-risetime)) {    //leg is set down
+            Y += riseStep*(stepcount - step);       //set down with time
+        }else {
+            Y += pawLift;  // else keep height
+        }
+    }
+    //    if ((currPhase == Swing) && (step > 0) && (step<stepcount-1)){
+    //            Y += pawLift;  // else keep height
+    //    }
     return (leg == 'f') ? ikforeleg(X, Y, side)
                         : ikhindleg(X, Y, side);
 }
