@@ -75,7 +75,7 @@ void CMouseCtrl::startCtrlThread() { //starting the loop thread
 
 void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
-    int motionlength = 50;
+    int motionlength = 30;
     char dir = '0';
     int state = '0';
     int cmd;
@@ -179,7 +179,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
             ProcessSpine(SetMotorPos, MotorID[HindRightHip], Remap(TrottArray[i][HINDRIGHT_HIP]), 1);
             ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
             ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
-            ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
+           // ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
             ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
             /*
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
@@ -651,7 +651,7 @@ bool CMouseLeg::StepNext()
 CLegPos CMouseLeg::NextWayPoint()
 {
     double X = ptLeg.x+vx, Y = ptLeg.y+vy;        // N�chsten Punkt ab current ptLeg errechnen
-    if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1))){
+/*    if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) && leg == 'h'){
         if (step < risetime){                       //leg rises
             Y += riseStep*step;                     //rise stepwise with time
         }else if (step > (stepcount-risetime)) {    //leg is set down
@@ -659,7 +659,7 @@ CLegPos CMouseLeg::NextWayPoint()
         }else {
             Y += pawLift;  // else keep height
         }
-    }
+    }*/
     //    if ((currPhase == Swing) && (step > 0) && (step<stepcount-1)){
     //            Y += pawLift;  // else keep height
     //    }
@@ -671,6 +671,10 @@ CLegPos CMouseLeg::NextWayPoint()
 CLegPos CMouseLeg::SetPosition(CLegPos ang)
 {
     docu[step] = ptLeg; //documentation for debugging
+   if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) ){//&& leg == 'f'){
+ 	(side == 'l') ? ang.coil = ang.coil-(pawLift*2)
+		      : ang.coil = ang.coil+(pawLift*2);
+	}
     ptLeg.x += vx;  ptLeg.y += vy;      // Vektor auf letzten Punkt addieren
     return ang; //output zurückgeben
 }
