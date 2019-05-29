@@ -590,7 +590,7 @@ void CMouseLeg::StartLeg(double x, double y, int length, typPhase phase)
     stepcount = length;
     currPhase = phase;
     if (phase == Swing){
-        risetime = (int)round((double)length/10);
+        risetime = (int)round((double)length/5);
         riseStep = pawLift/risetime;
     }
     StepStart(x,y);
@@ -651,7 +651,7 @@ bool CMouseLeg::StepNext()
 CLegPos CMouseLeg::NextWayPoint()
 {
     double X = ptLeg.x+vx, Y = ptLeg.y+vy;        // N�chsten Punkt ab current ptLeg errechnen
-/*    if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) && leg == 'h'){
+   if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) && leg == 'h'){
         if (step < risetime){                       //leg rises
             Y += riseStep*step;                     //rise stepwise with time
         }else if (step > (stepcount-risetime)) {    //leg is set down
@@ -659,7 +659,7 @@ CLegPos CMouseLeg::NextWayPoint()
         }else {
             Y += pawLift;  // else keep height
         }
-    }*/
+    }
     //    if ((currPhase == Swing) && (step > 0) && (step<stepcount-1)){
     //            Y += pawLift;  // else keep height
     //    }
@@ -671,7 +671,7 @@ CLegPos CMouseLeg::NextWayPoint()
 CLegPos CMouseLeg::SetPosition(CLegPos ang)
 {
     docu[step] = ptLeg; //documentation for debugging
-   if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) ){//&& leg == 'f'){
+   if ((currPhase == Swing) && (step > 0) && (step<(stepcount-1)) && leg == 'f'){
  	(side == 'l') ? ang.coil = ang.coil-(pawLift*2)
 		      : ang.coil = ang.coil+(pawLift*2);
 	}
