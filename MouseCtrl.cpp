@@ -303,6 +303,16 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     //Spine positions
     tmpSpine = Spine.centre();
 
+    //Forelg init pos:
+    LForeLeft.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);
+    tmpFL = LForeRight.GetNext();
+    double foreLeftInitL = tmpFL.leg;
+    double foreLeftInitC = tmpFL.coil;
+    //LForeRight.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);
+    //tmpFL = LForeRight.GetNext();
+    //double foreRightInitL = tmpFL.leg;
+    //double foreRightInitC = tmpFL.coil;
+
     //1)Move Forlegs into backward position one by one--------------------------------------------------------
 
     //Forward Goal backward pos
@@ -325,8 +335,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
         TrottArray[i][FORELEFT_HIP] = tmpFL.leg;
         TrottArray[i][FORELEFT_KNEE] = tmpFL.coil;
         }else {
-            TrottArray[i][FORELEFT_HIP] = 180;
-            TrottArray[i][FORELEFT_KNEE] = 180;
+            TrottArray[i][FORELEFT_HIP] = foreLeftInitL;
+            TrottArray[i][FORELEFT_KNEE] = foreLeftInitC;
         }
         tmpHL = LHindLeft.GetNext();
         TrottArray[i][HINDLEFT_HIP] = 180;
