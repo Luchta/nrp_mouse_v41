@@ -304,8 +304,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     tmpSpine = Spine.centre();
 
     //Forelg init pos:
-    LForeLeft.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);
-    tmpFL = LForeRight.GetNext();
+    LForeLeft.StartLeg(0, 0, 1, CMouseLeg::Stance);
+    tmpFL = LForeLeft.GetNext();
     double foreLeftInitL = tmpFL.leg;
     double foreLeftInitC = tmpFL.coil;
     //LForeRight.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);
