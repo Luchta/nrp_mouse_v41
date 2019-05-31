@@ -16,9 +16,9 @@ int main()
     Mouse.sendNL();
     usleep(10000);
 
-    Mouse.MotorP = 17;
+    Mouse.MotorP = 16;
     Mouse.MotorI = 0;
-    Mouse.MotorD = 35;
+    Mouse.MotorD = 37;
 
     Mouse.MotorSetup();
 

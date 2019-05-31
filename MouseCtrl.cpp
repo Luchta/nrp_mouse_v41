@@ -75,7 +75,7 @@ void CMouseCtrl::startCtrlThread() { //starting the loop thread
 
 void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
-    int motionlength = 30;
+    int motionlength = 40;
     char dir = '0';
     int state = '0';
     int cmd;
@@ -185,7 +185,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
         */
-            usleep(50000); //testwise parameter
+            usleep(40000); //testwise parameter
         }
     }
 }

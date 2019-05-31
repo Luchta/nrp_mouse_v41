@@ -111,7 +111,8 @@ void CMouseCom::MotorSetup()
         l = sprintf (buffer, ":%02d!U-\n", Motor[i]);
         sendUartMessage(buffer,l);
         usleep(10000); //safety delay to avoid collisions
-        //Set PID Values
+        
+	//Set PID Values
         // P
         l = sprintf (buffer, ":%02d!CP=%03x0\n", Motor[i], MotorP);
         sendUartMessage(buffer,l);
@@ -124,8 +125,8 @@ void CMouseCom::MotorSetup()
         l = sprintf (buffer, ":%02d!CD=%03x0\n", Motor[i], MotorD);
         sendUartMessage(buffer,l);
         usleep(5000); //safety delay to avoid collisions
+    	
     }
-    //send
 }
 
 
