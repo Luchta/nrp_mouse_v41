@@ -185,7 +185,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
         */
-            usleep(10000); //testwise parameter
+            usleep(50000); //testwise parameter
         }
     }
 }
@@ -304,8 +304,8 @@ void CMouseCtrl::SitUp(int length) //initalizes all legs to zero position
     tmpSpine = Spine.centre();
 
     //Forelg init pos:
-    LForeLeft.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);
-    tmpFL = LForeRight.GetNext();
+    LForeLeft.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
+    tmpFL = LForeLeft.GetNext();
     double foreLeftInitL = tmpFL.leg;
     double foreLeftInitC = tmpFL.coil;
     //LForeRight.StartLeg(uFrontLegStart+uStepLengthF, 0, 1, CMouseLeg::Stance);

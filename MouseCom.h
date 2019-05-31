@@ -27,6 +27,10 @@ public:
                             InitMouse, Trott, StopAll} typCmd;                        // commands from shell
     std::atomic<Ccmnd> consoleCmnd;// for thread communication
 
+    int MotorP = 17;
+    int MotorI = 0;
+    int MotorD = 35;
+
     //Functions
     void startThread();
     void startUART();
@@ -39,6 +43,9 @@ public:
     void sendNL();
 
     void MotorPwrCycle();
+    void setMotorPID(int id, int val1, int val2);
+    void setMotorSilent(int id, int val1);
+    void MotorSetup();
 protected:
     //virtual void ProcessSpine(typCmd cmd, int val1, int val2, int val3);
     virtual CMousCtrlSet& InitRPI(){}

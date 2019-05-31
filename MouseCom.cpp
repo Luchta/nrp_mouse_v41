@@ -50,6 +50,7 @@ void CMouseCom::startUART()
     usleep(100000);
     sendNL();//flush the buffer, all new
     usleep(10000);
+    MotorSetup();
 }
 
 void CMouseCom::setConsoleCcmnd(typCmd cmd, int val1, int val2, int val3){
@@ -98,6 +99,34 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
 }
 
 //PRIVATE/////////////////////////////////////////////////////////////////////////////////////////////
+//Motor Setup---------------------------------------------------------------------------------------
+void CMouseCom::MotorSetup()
+{
+    int Motor[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
+    int l;
+    char buffer [18];
+
+    for (int i=0;i<13;i++) {
+        //Set Motors Silent
+        l = sprintf (buffer, ":%02d!U-\n", Motor[i]);
+        sendUartMessage(buffer,l);
+        usleep(10000); //safety delay to avoid collisions
+        //Set PID Values
+        // P
+        l = sprintf (buffer, ":%02d!CP=%03x0\n", Motor[i], MotorP);
+        sendUartMessage(buffer,l);
+        usleep(5000); //safety delay to avoid collisions
+        // I
+        l = sprintf (buffer, ":%02d!CI=%03x0\n", Motor[i], MotorI);
+        sendUartMessage(buffer,l);
+        usleep(5000); //safety delay to avoid collisions
+        // D
+        l = sprintf (buffer, ":%02d!CD=%03x0\n", Motor[i], MotorD);
+        sendUartMessage(buffer,l);
+        usleep(5000); //safety delay to avoid collisions
+    }
+    //send
+}
 
 
 //Sending-------------------------------------------------------------------------------------------------
@@ -133,7 +162,16 @@ void CMouseCom::setMotorLed(int id, int state)
     int l;
     char buffer [18];
     //string: ":ID!L=STATE"
-    l = sprintf (buffer, ":%02d!L%d\n", id, state);
+    if (state == 1) {
+        //switch on
+        l = sprintf (buffer, ":%02d!L+\n", id);
+    }else if (state == 0){
+        //set off
+        l = sprintf (buffer, ":%02d!L-\n", id);
+    }else {
+        //set frequency
+        l = sprintf (buffer, ":%02d!L=%04x\n", id, state);
+    }
     //send
     sendUartMessage(buffer,l);
 }
@@ -156,6 +194,46 @@ void CMouseCom::sendNL()
     char buffer [18];
     //string: ":ID!L=STATE"
     l = sprintf (buffer, "\n");
+    //send
+    sendUartMessage(buffer,l);
+}
+
+void CMouseCom::setMotorSilent(int id, int val1)
+{
+    //------ form string------
+    int l=0;
+    char buffer [18];
+
+    if (val1 == 1) {
+        //switch on
+        l = sprintf (buffer, ":%02d!U+\n", id);
+    }else if (val1 == 0){
+        //switch off
+        l = sprintf (buffer, ":%02d!U-\n", id);
+    }
+    //send
+    sendUartMessage(buffer,l);
+}
+
+void CMouseCom::setMotorPID(int id, int val1, int val2)
+{
+    //------ form string------
+    //TODO remove last 0 when reprogramming servos
+    int l;
+    char buffer [18];
+    //string: ":ID!L=STATE"
+    if (val1 == 'P') {
+        //switch on
+        l = sprintf (buffer, ":%02d!CP=%03x0\n", id, val2);
+    }else if (val1 == 'I'){
+        //set off
+        l = sprintf (buffer, ":%02d!CI=%03x0\n", id, val2);
+    }else if (val1 == 'D') {
+        //set frequency
+        l = sprintf (buffer, ":%02d!CD=%03x0\n", id, val2);
+    }else {
+        return;
+    }
     //send
     sendUartMessage(buffer,l);
 }
@@ -213,7 +291,7 @@ bool CMouseCom::sendUartMessage(char buffer[], int l){
         int count = write(uart0_sendstream, &buffer[0], l);		//Filestream, bytes to write, number of bytes to write
         //int count = write(uart0_filestream, &tx_buffer[0], (p_tx_buffer - &tx_buffer[0])); //Filestream, bytes to write, number of bytes to write
         //FIXME!
-        usleep(10000); //safety delay to avoid collisions
+        //usleep(10000); //safety delay to avoid collisions
         if (count < 0)
         {
             //printf("UART TX error\n");

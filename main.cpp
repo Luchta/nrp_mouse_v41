@@ -16,11 +16,14 @@ int main()
     Mouse.sendNL();
     usleep(10000);
 
+    Mouse.MotorP = 17;
+    Mouse.MotorI = 0;
+    Mouse.MotorD = 35;
+
+    Mouse.MotorSetup();
+
     //usleep(200000);
     UI.process();
-
-    //mouse.startUART();
-    //mouse.mainCtrl();
 
     return 0;
 }
