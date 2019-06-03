@@ -114,46 +114,46 @@ private:
 class CMouseLeg : public CKinematics
 {
 public:
-  CMouseLeg(char _leg, char _side, int _pawLift) { vx=vy=0; leg=_leg; side=_side; pawLift=_pawLift;}
-  virtual ~CMouseLeg() {}
+    CMouseLeg(char _leg, char _side, int _pawLift) { vx=vy=0; leg=_leg; side=_side; pawLift=_pawLift;}
+    virtual ~CMouseLeg() {}
 
-  typedef enum Phase{ Swing, Stance} typPhase;
-  //FUNCTIONS
-  void StartLeg(double x, double y, int length, typPhase phase);
-  CLegPos GetNext();
-  void MoveTo   (double x, double y);
-  void Dump();
+    typedef enum Phase{ Swing, Stance} typPhase;
+    //FUNCTIONS
+    void StartLeg(double x, double y, int length, typPhase phase);
+    CLegPos GetNext();
+    void MoveTo   (double x, double y);
+    void Dump();
 
 private:
-  //FUNCTIONS
-  void StepStart(double x, double y);
-  bool StepNext ();
-  CLegPos NextWayPoint();
-  CLegPos SetPosition(CLegPos ang);//double deg1, double deg2);
-  float Distance(float x1, float y1, float x2, float y2);
+    //FUNCTIONS
+    void StepStart(double x, double y);
+    bool StepNext ();
+    CLegPos NextWayPoint();
+    CLegPos SetPosition(CLegPos ang);//double deg1, double deg2);
+    float Distance(float x1, float y1, float x2, float y2);
 
-  //OBJECTS
-  CKoord  ptLeg;   // x/y destination pos in move, current pos !in move
-  CLegPos dgNext;  // Next Point on walking line
-  CLegPos output;  // Output Value
-  typPhase currPhase;
-  CKoord docu[100]; //docu array
+    //OBJECTS
+    CKoord  ptLeg;   // x/y destination pos in move, current pos !in move
+    CLegPos dgNext;  // Next Point on walking line
+    CLegPos output;  // Output Value
+    typPhase currPhase;
+    CKoord docu[100]; //docu array
 
-  //VARIABLES
-  double vx, vy, riseStep;   // vector from current to destination x/y-point, divided by step stepcount
-  int  stepcount,  // number of kinematic-steps
-       step,       // current step number
-       pawLift,     // how high does the leg lift
-       risetime;    //time till the leg is lifted/set down
-  char leg;    // Motor id of hip motor (knee++)
-  char side;
+    //VARIABLES
+    double vx, vy, riseStep;   // vector from current to destination x/y-point, divided by step stepcount
+    int  stepcount,  // number of kinematic-steps
+    step,       // current step number
+    pawLift,     // how high does the leg lift
+    risetime;    //time till the leg is lifted/set down
+    char leg;    // Motor id of hip motor (knee++)
+    char side;
 };
 
 class CMouseCtrl : public CMouseCom
 {
 public:
     CMouseCtrl();
-    virtual ~CMouseCtrl() {}  
+    virtual ~CMouseCtrl() {}
 
     //VARIABLES
     int messages; // message to UI thread
@@ -161,13 +161,28 @@ public:
     static const int ArrayBuffer = 100;
     static const int Motors = 13;
     double TrottArray[ArrayBuffer][Motors+1];
-
+/*
     int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
     typedef enum Motors{ForeLeftHip, ForeLeftKnee,
-                       HindLeftHip, HindLeftKnee,
-                       ForeRightHip, ForeRightKnee,
-                       HindRightHip, HindRightKnee,
-                       SpineFlex, SpineRot, TailRot, HeadTurn, HeadNod} typMotor;
+                        HindLeftHip, HindLeftKnee,
+                        ForeRightHip, ForeRightKnee,
+                        HindRightHip, HindRightKnee,
+                        SpineFlex, SpineRot, TailRot, HeadTurn, HeadNod} typMotor;
+*/
+    //defines for Motor IDs
+#define ID_FORELEFT_HIP 00
+#define ID_FORELEFT_KNEE 01
+#define ID_HINDLEFT_HIP 10
+#define ID_HINDLEFT_KNEE 11
+#define ID_FORERIGHT_HIP 20
+#define ID_FORERIGHT_KNEE 21
+#define ID_HINDRIGHT_HIP 30
+#define ID_HINDRIGHT_KNEE 31
+#define ID_SPINE_FLEX 40
+#define ID_SPINE 41
+#define ID_TAIL 42
+#define ID_HEAD_PAN 43
+#define ID_HEAD_TILT 44
 
     typedef enum Direction{ Fwd, Bkwd, left, right, stop, stance} typDir;
     typDir dir = stop;
@@ -224,7 +239,7 @@ public:
     CMouseRos();
     virtual ~CMouseRos() {}
     //FUNCTIONS
-    void RosCtrl(); 
+    void RosCtrl();
     void ROSstartThread();
 private:
     //FUNCTIONS
