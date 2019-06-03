@@ -180,7 +180,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
             ProcessSpine(SetMotorPos, MotorID[HindRightKnee], Remap(TrottArray[i][HINDRIGHT_KNEE]), 1);
             ProcessSpine(SetMotorPos, MotorID[SpineRot], Remap(TrottArray[i][SPINE]), 1);
            // ProcessSpine(SetMotorPos, MotorID[TailRot], Remap(TrottArray[i][TAIL]), 1);
-            //ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
+           ProcessSpine(SetMotorPos, MotorID[SpineFlex], Remap(TrottArray[i][SPINE_FLEX]), 1);
             /*
         ProcessSpine(SetMotorPos, MotorID[HeadTurn], Remap(TrottArray[i][HEAD_PAN]), 1);
         ProcessSpine(SetMotorPos, MotorID[HeadNod], Remap(TrottArray[i][HEAD_TILT]), 1);
