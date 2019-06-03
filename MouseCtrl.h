@@ -161,9 +161,9 @@ public:
     static const int ArrayBuffer = 100;
     static const int Motors = 13;
     double TrottArray[ArrayBuffer][Motors+1];
-/*
+
     int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
-    typedef enum Motors{ForeLeftHip, ForeLeftKnee,
+ /*   typedef enum Motors{ForeLeftHip, ForeLeftKnee,
                         HindLeftHip, HindLeftKnee,
                         ForeRightHip, ForeRightKnee,
                         HindRightHip, HindRightKnee,
