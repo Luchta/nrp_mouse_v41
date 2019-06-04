@@ -83,15 +83,15 @@ public:
     CSpinePos centre();
 
 private:
-    const int RangeLeft = 40;
-    const int RangeRight = 40;
+    const int RangeLeft = 50;
+    const int RangeRight = 50;
     const int posStreched = 130;
     const int posCrouched = 180;
     const int cOffsetSpine = -5;
     const int cOffsetTail = 0;
     const int cOffsetFlex = 0;
     const int posCentre = 180;
-    const int spineStep = 20;
+    const int spineStep = 10;
     const int posSpineCentre = posCentre + cOffsetSpine;
     const int posTailCentre = posCentre + cOffsetTail;
     const int posFarLeft = posSpineCentre - RangeLeft;
@@ -158,7 +158,7 @@ public:
     //VARIABLES
     int messages; // message to UI thread
 
-    static const int ArrayBuffer = 100;
+    static const int ArrayBuffer = 200;
     static const int Motors = 13;
     double TrottArray[ArrayBuffer][Motors+1];
 
@@ -221,15 +221,23 @@ private:
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
 
-
-    double MotionArray[ArrayBuffer][Motors+1];
+    // Motion Storage
+    static const int storageBuffer = 10000;
+    double StoreArray[storageBuffer][Motors+1];
+    std::chrono::milliseconds TimeStamp[storageBuffer];
+    bool storeData = true;
+    int si = 0; //storage index
 
     //FUNCTIONS
     void TrotRight();
     void moveLeg();
-    void Print(int length = 1);
+    void Print(int i = 1);
     void Publish(int length = 1);
     int Remap(double in);
+    void Store(int i);
+    void StoreFile();
+    void SendMotorMsgs(int i);
+    std::chrono::milliseconds GetCurTime();
 };
 
 #ifdef ROS
