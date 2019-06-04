@@ -223,6 +223,18 @@ private:
     const int uFWalkLevel      = 10;//10;  // y walking level of init and walking
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
+    const int uPosSpineFlexRelax = 180;
+
+
+    //Sitting Parameters
+    const int sitPosSpine = 180;
+    const int sitPosFL = uFrontLegStart+uStepLengthF;
+    const int sitPushPosFL = uFrontLegStart+30;
+    const int sitPosHL = 40;
+    const int sitPosTail = 180;
+    const int sitPosSpineFlex = 140;
+    const int sitPosHeadPan = 180;
+    const int sitPosHeadTilt = 180;
 
     // Motion Storage
     static const int storageBuffer = 10000;
@@ -244,6 +256,11 @@ private:
     void StoreFile();
     void SendMotorMsgs(int i);
     std::chrono::milliseconds GetCurTime();
+    void clearStoreArr();
+    void PushLever(int length, char side);
+    void LiftHand(int length, char side);
+    void SitDown(int length);
+    void Greeting();
 };
 
 #ifdef ROS

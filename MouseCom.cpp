@@ -21,8 +21,8 @@
 
 CMouseCom::CMouseCom()
 {
-    if(DEBUG){std::cout << "mouse_com init in Debug Mode\n";}
-    else {std::cout << "mouse_com init in standard Mode\n";}
+    if(DEBUG){std::cout << "Mouse Com in Debug Mode\n";}
+    else {std::cout << "Mouse Com in Standard Mode\n";}
     //InitRPI();
 }
 
