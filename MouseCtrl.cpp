@@ -28,7 +28,7 @@
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-#define DEBUG true
+#define DEBUG false
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,11 +77,13 @@ void CMouseCtrl::startCtrlThread() { //starting the loop thread
 
 void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
-    int motionlength = 40;
+    int motionlength = 50;
     //char dir = '0';
-    int state = '0';
+
     int cmd;
     bool OK = true;
+
+    StartTime = GetCurTime().count();
 
     clearArr(); //set everything to 90 deg, to avoid damage.
 
@@ -98,10 +100,10 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
         switch (state) {
         case 'i':   //initalize pose
             dir = stop;
-            std::cout << "init" << std::endl;
+            std::cout << "init" << std::endl;           
+            Init(1);
+            Publish(1);
             messages = 0;
-            Init(3);
-            Publish(3);
             state = 'h';
             break;
         case 'w': //walk forward
@@ -181,7 +183,7 @@ void CMouseCtrl::Publish(int length) //print the array values for calculated len
         }else {
             SendMotorMsgs(i);
 
-            usleep(40000); //send delay between points
+            usleep(30000); //send delay between points
         }
         //Storage
         if ((si+length) > storageBuffer){storeData = false;}
@@ -228,7 +230,7 @@ void CMouseCtrl::Print(int i) //print the array values for calculated lengthss
 }
 
 void CMouseCtrl::Store(int i){
-    TimeStamp[si+i] = GetCurTime();
+    TimeStamp[si+i] = GetCurTime().count();
     StoreArray[si+i][A_TIMESTAMP] = si+i;
     StoreArray[si+i][A_FORELEFT_HIP] = TrottArray[i][A_FORELEFT_HIP];
     StoreArray[si+i][A_FORELEFT_KNEE] = TrottArray[i][A_FORELEFT_KNEE];
@@ -243,58 +245,50 @@ void CMouseCtrl::Store(int i){
     StoreArray[si+i][A_SPINE_FLEX] = TrottArray[i][A_SPINE_FLEX];
     StoreArray[si+i][A_HEAD_PAN] = TrottArray[i][A_HEAD_PAN];
     StoreArray[si+i][A_HEAD_PAN] = TrottArray[i][A_HEAD_PAN];
+    StoreArray[si+i][14] = state;
 }
 
 void CMouseCtrl::StoreFile() //print the array values for calculated lengthss
 {
     std::ofstream myfile;
-    //std::cout << "Opening Storage File\n";
     int l;
     char buffer [18];
+
+    //wirte new Filename
     l = sprintf (buffer, "MotionStorage_%d.txt", fileNr);
     fileNr++;
+    //open File
     myfile.open (&buffer[0]);
-    //myfile.open ("MotionStorage.txt");
 
-    //std::cout << "Writing to File\n ";
-    /*
-    myfile << "TIMESTAMP; "
-           << "FORELEFT_HIP; "
-           << "FORELEFT_KNEE; "
-           << "FORERIGHT_HIP; "
-           << "FORERIGHT_KNEE; "
-           << "HINDLEFT_HIP; "
-           << "HINDLEFT_KNEE; "
-           << "HINDRIGHT_HIP; "
-           << "HINDRIGHT_KNEE; "
-           << "SPINE; "
-           << "TAIL; "
-           << "SPINE_FLEX; "
-           << "HEAD_PAN; "
-           << "HEAD_TILT \n ";
-*/
+    if (myfile.is_open())
+      {
+        for(int i=0;i<storageBuffer;i++)
+        {
+            myfile << (TimeStamp[i]-StartTime) << ","
+                   << StoreArray[i][A_TIMESTAMP] << ","
+                   << StoreArray[i][A_FORELEFT_HIP] << ","
+                   << StoreArray[i][A_FORELEFT_KNEE] << ","
+                   << StoreArray[i][A_FORERIGHT_HIP] << ","
+                   << StoreArray[i][A_FORERIGHT_KNEE] << ","
+                   << StoreArray[i][A_HINDLEFT_HIP] << ","
+                   << StoreArray[i][A_HINDLEFT_KNEE] << ","
+                   << StoreArray[i][A_HINDRIGHT_HIP] << ","
+                   << StoreArray[i][A_HINDRIGHT_KNEE] << ","
+                   << StoreArray[i][A_SPINE] << ","
+                   << StoreArray[i][A_TAIL] << ","
+                   << StoreArray[i][A_SPINE_FLEX] << ","
+                   << StoreArray[i][A_HEAD_PAN] << ","
+                   << StoreArray[i][A_HEAD_TILT] << ","
+                   << StoreArray[i][14] << "\n ";
+        }
 
-    for(int i=0;i<storageBuffer;i++)
-    {
-        myfile << TimeStamp[i].count() << ","
-               << StoreArray[i][A_TIMESTAMP] << ","
-               << StoreArray[i][A_FORELEFT_HIP] << ","
-               << StoreArray[i][A_FORELEFT_KNEE] << ","
-               << StoreArray[i][A_FORERIGHT_HIP] << ","
-               << StoreArray[i][A_FORERIGHT_KNEE] << ","
-               << StoreArray[i][A_HINDLEFT_HIP] << ","
-               << StoreArray[i][A_HINDLEFT_KNEE] << ","
-               << StoreArray[i][A_HINDRIGHT_HIP] << ","
-               << StoreArray[i][A_HINDRIGHT_KNEE] << ","
-               << StoreArray[i][A_SPINE] << ","
-               << StoreArray[i][A_TAIL] << ","
-               << StoreArray[i][A_SPINE_FLEX] << ","
-               << StoreArray[i][A_HEAD_PAN] << ","
-               << StoreArray[i][A_HEAD_TILT] << "\n ";
-    }
-
-    myfile.close();
-    std::cout << "Storage Completed \n ";
+        myfile.close();
+        std::cout << "Storage Completed \n ";
+      }
+      else
+      {
+        std::cout << "Error opening file";
+      }
 }
 
 std::chrono::milliseconds CMouseCtrl::GetCurTime(){

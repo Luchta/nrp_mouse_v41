@@ -208,6 +208,9 @@ private:
     CMouseLeg LHindRight = CMouseLeg('h','r', HLift); //fwd=180 bkwd=0 up=180 down=0
     CSpine Spine = CSpine();
 
+    //Global Variables
+    int state = '0';
+
     //Motion Parameters
     static const int FLift = 25; //height of the foot lift
     static const int HLift = 20; //height of the foot lift
@@ -223,11 +226,13 @@ private:
 
     // Motion Storage
     static const int storageBuffer = 10000;
-    double StoreArray[storageBuffer][Motors+1];
-    std::chrono::milliseconds TimeStamp[storageBuffer];
+    static const int storagevariables = 2; //time, cmd
+    double StoreArray[storageBuffer][Motors+storagevariables];
+    long int TimeStamp[storageBuffer];
     bool storeData = true;
     int si = 0; //storage index
     int fileNr = 0; //File index
+    long int StartTime;
 
     //FUNCTIONS
     void TrotRight();
