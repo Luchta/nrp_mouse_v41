@@ -249,7 +249,12 @@ void CMouseCtrl::StoreFile() //print the array values for calculated lengthss
 {
     std::ofstream myfile;
     //std::cout << "Opening Storage File\n";
-    myfile.open ("MotionStorage.txt");
+    int l;
+    char buffer [18];
+    l = sprintf (buffer, "MotionStorage_%d.txt", fileNr);
+    fileNr++;
+    myfile.open (&buffer[0]);
+    //myfile.open ("MotionStorage.txt");
 
     //std::cout << "Writing to File\n ";
     /*

@@ -227,6 +227,7 @@ private:
     std::chrono::milliseconds TimeStamp[storageBuffer];
     bool storeData = true;
     int si = 0; //storage index
+    int fileNr = 0; //File index
 
     //FUNCTIONS
     void TrotRight();
