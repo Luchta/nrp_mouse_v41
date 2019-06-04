@@ -205,7 +205,7 @@ void CMouseCtrl::SendMotorMsgs(int i){
     ProcessSpine(SetMotorPos, ID_HINDRIGHT_HIP, Remap(TrottArray[i][A_HINDRIGHT_HIP]), 1);
     ProcessSpine(SetMotorPos, ID_HINDRIGHT_KNEE, Remap(TrottArray[i][A_HINDRIGHT_KNEE]), 1);
     ProcessSpine(SetMotorPos, ID_SPINE, Remap(TrottArray[i][A_SPINE]), 1);
-    // ProcessSpine(SetMotorPos, ID_TAIL, Remap(TrottArray[i][A_TAIL]), 1);
+    ProcessSpine(SetMotorPos, ID_TAIL, Remap(TrottArray[i][A_TAIL]), 1);
     ProcessSpine(SetMotorPos, ID_SPINE_FLEX, Remap(TrottArray[i][A_SPINE_FLEX]), 1);
     //ProcessSpine(SetMotorPos, ID_HEAD_PAN, Remap(TrottArray[i][A_HEAD_PAN]), 1);
     //ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(TrottArray[i][A_HEAD_TILT]), 1);
@@ -521,10 +521,10 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
     case Fwd:
         tmpSpine = Spine.centre();
         break;
-    case left:
+    case right:
         tmpSpine = Spine.moveStepLeft(motionlength);
         break;
-    case right:
+    case left:
         tmpSpine = Spine.moveStepRight(motionlength);
         break;
     }

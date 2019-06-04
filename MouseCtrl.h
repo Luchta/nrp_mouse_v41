@@ -83,9 +83,9 @@ public:
     CSpinePos centre();
 
 private:
-    const int RangeLeft = 50;
-    const int RangeRight = 50;
-    const int posStreched = 130;
+    const int RangeLeft = 40;
+    const int RangeRight = 40;
+    const int posStreched = 120;
     const int posCrouched = 180;
     const int cOffsetSpine = -5;
     const int cOffsetTail = 0;
