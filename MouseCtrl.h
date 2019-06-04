@@ -232,7 +232,7 @@ private:
     const int sitPushPosFL = uFrontLegStart+30;
     const int sitPosHL = 40;
     const int sitPosTail = 180;
-    const int sitPosSpineFlex = 140;
+    const int sitPosSpineFlex = 130;
     const int sitPosHeadPan = 180;
     const int sitPosHeadTilt = 180;
 
