@@ -154,21 +154,6 @@ class CMouseCtrl : public CMouseCom
 public:
     CMouseCtrl();
     virtual ~CMouseCtrl() {}
-
-    //VARIABLES
-    int messages; // message to UI thread
-
-    static const int ArrayBuffer = 200;
-    static const int Motors = 13;
-    double TrottArray[ArrayBuffer][Motors+1];
-
-    int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
- /*   typedef enum Motors{ForeLeftHip, ForeLeftKnee,
-                        HindLeftHip, HindLeftKnee,
-                        ForeRightHip, ForeRightKnee,
-                        HindRightHip, HindRightKnee,
-                        SpineFlex, SpineRot, TailRot, HeadTurn, HeadNod} typMotor;
-*/
     //defines for Motor IDs
 #define ID_FORELEFT_HIP 00
 #define ID_FORELEFT_KNEE 01
@@ -184,21 +169,23 @@ public:
 #define ID_HEAD_PAN 43
 #define ID_HEAD_TILT 44
 
+    //VARIABLES
+    int messages; // message to UI thread
+
+    static const int ArrayBuffer = 200;
+    static const int Motors = 13;
+    double TrottArray[ArrayBuffer][Motors+1];
+
+    int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
+
     typedef enum Direction{ Fwd, Bkwd, left, right, stop, stance} typDir;
     typDir dir = stop;
 
     //FUNCTIONS
-    //control
     void Ctrl();
     void startCtrlThread();
-    //walking
-    void clearArr();
-    void Trot(int motionlength);
-    void Init(int length = 1);
-    void TrotBkw(int motionlength);
-    void SitUp(int length);
-
     void StopAllMotors();
+
 private:
 
     //OBJECTS
@@ -225,16 +212,19 @@ private:
     const int uSitting_y      = 30;  // Y position for foot in sitting
     const int uPosSpineFlexRelax = 180;
 
-
     //Sitting Parameters
     const int sitPosSpine = 168;
-    const int sitPosFL = uFrontLegStart+uStepLengthF;
-    const int sitPushPosFL = uFrontLegStart+30;
+    const int sitPosFL = uFrontLegStart+uStepLengthF;   
     const int sitPosHL = 40;
     const int sitPosTail = 180;
     const int sitPosSpineFlex = 130;
     const int sitPosHeadPan = 180;
     const int sitPosHeadTilt = 236;
+
+    //Lever Pressing Parameters
+    const int sitStrechPosFL = -7;
+    const int sitPushPosFL = uFrontLegStart+30;
+    const int sitLiftPosFL = sitPushPosFL-15;
 
     // Motion Storage
     static const int storageBuffer = 10000;
@@ -247,23 +237,33 @@ private:
     long int StartTime;
 
     //FUNCTIONS
-    void TrotRight();
-    void moveLeg();
-    void Print(int i = 1);
+    //Control
+    void Greeting();
     void Publish(int length = 1);
     int Remap(double in);
+    void SendMotorMsgs(int i);
+    //debug
+    void Print(int i = 1);
+    //storage
     void Store(int i);
     void StoreFile();
-    void SendMotorMsgs(int i);
     std::chrono::milliseconds GetCurTime();
+    //array fkts
     void clearStoreArr();
-    void PushLever(int length, char side);
-    void LiftHand(int length, char side);
+    void clearArr();
+    //walking
+    void Trot(int motionlength);
+    void Init(int length = 1);
+    void TrotBkw(int motionlength);
+    //Sitting
     void SitDown(int length);
-    void Greeting();
-    void LiftHands(int length);
-    void LiftHands2(int length);
-    void SwitchLever(int length, char side);
+    void SitUp(int length);
+    //Levers
+    void ReleaseLever(int length, char side);
+    //void LiftHand(int length, char side);
+    void PushBothHands(int length);
+    void LiftBothHands(int length);
+    //void SwitchLever(int length, char side);
 };
 
 #ifdef ROS
