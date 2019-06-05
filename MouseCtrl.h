@@ -261,6 +261,8 @@ private:
     void LiftHand(int length, char side);
     void SitDown(int length);
     void Greeting();
+    void LiftHands(int length);
+    void SwitchLever(int length, char side);
 };
 
 #ifdef ROS
