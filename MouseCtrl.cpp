@@ -86,8 +86,11 @@ void CMouseCtrl::Greeting(){
     std::cout<<"d: walk left the more the often you press\n";
     std::cout<<"s: Stop Motors\n";
     std::cout<<"y: Sit up\n";
-    std::cout<<"x: lift paw\n";
-    std::cout<<"c: press lever\n";
+    std::cout<<"f: lift both paws up\n";
+    std::cout<<"x: lift left paw\n";
+    std::cout<<"e: push left lever\n";
+    std::cout<<"r: push right lever\n";
+    std::cout<<"c: switch lever\n";
     std::cout<<"v: Sit down\n";
     std::cout<<"q: quit programm\n";
     std::cout<<"p: print position data to file\n";
