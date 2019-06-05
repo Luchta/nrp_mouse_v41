@@ -234,15 +234,16 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
 void CMouseCtrl::Publish(int length) //print the array values for calculated lengthss
 {
     int i=0;
+    unsigned int CommandDelay = 30000;
 
     for(i=0;i<length;i++)
     {
         if (DEBUG){
             Print(i);
+            usleep(CommandDelay); //send delay between points
         }else {
             SendMotorMsgs(i);
-
-            usleep(30000); //send delay between points
+            usleep(CommandDelay); //send delay between points
         }
         //Storage
         if ((si+length) > storageBuffer){storeData = false;}
@@ -1002,10 +1003,10 @@ void CMouseCtrl::PushLever(int length, char side){
     //Forelegs
     if (side == 'l'){
         LForeLeft.StartLeg((uFrontLegStart+10), 0, half, CMouseLeg::Stance);
-        LForeRight.StartLeg(sitPosFL, 0, 1, CMouseLeg::Stance);
+        LForeRight.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
     }else if (side == 'r') {
         LForeRight.StartLeg((uFrontLegStart+10), 0, half, CMouseLeg::Stance);
-        LForeLeft.StartLeg(sitPosFL, 0, 1, CMouseLeg::Stance);
+        LForeLeft.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
     }
     tmpFL = LForeLeft.GetNext();
     tmpFR = LForeRight.GetNext();
@@ -1065,10 +1066,10 @@ void CMouseCtrl::PushLever(int length, char side){
     //Lift hand up again
     if (side == 'l'){
         LForeLeft.StartLeg(uFrontLegStart, 0, half, CMouseLeg::Swing);
-        LForeRight.StartLeg(sitPosFL, 0, 1, CMouseLeg::Stance);
+        LForeRight.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
     }else if (side == 'r') {
         LForeRight.StartLeg(uFrontLegStart, 0, half, CMouseLeg::Swing);
-        LForeLeft.StartLeg(sitPosFL, 0, 1, CMouseLeg::Stance);
+        LForeLeft.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
     }
 
     for (int i=half; i<length; i++)
