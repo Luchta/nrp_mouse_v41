@@ -1,4 +1,4 @@
-﻿#include "MouseCtrl.h"
+#include "MouseCtrl.h"
 #include <cmath> //pi and others
 #include <iostream>
 #include <termios.h>
@@ -105,7 +105,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
     int cmd;
     int situpDownTime = 80;
     int switchingTime = 20;
-    int pushingTime = 15;
+    int pushingTime = 20;
     int initTime = 1;
 
     bool OK = true;
@@ -184,8 +184,15 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             state = 'h';
             break;
         case 'f':   //lift both paws
-            std::cout<<"lift both paws"<<std::endl;
+            std::cout<<"init press both paws"<<std::endl;
             LiftHands(switchingTime);
+            Publish(switchingTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case 't':   //lift both paws
+            std::cout<<"lift both paws"<<std::endl;
+            LiftHands2(switchingTime);
             Publish(switchingTime);
             messages = 0;
             state = 'h';
@@ -944,8 +951,63 @@ void CMouseCtrl::SitDown(int length){
 void CMouseCtrl::LiftHands(int length){
     CLegPos tmpFL, tmpFR ,tmpHL, tmpHR;
     //Forelegs
-    LForeLeft.StartLeg(uFrontLegStart, 0, length, CMouseLeg::Swing);
-    LForeRight.StartLeg(uFrontLegStart, 0, length, CMouseLeg::Swing);
+    LForeLeft.StartLeg(sitPushPosFL, 0, length, CMouseLeg::Stance);
+    LForeRight.StartLeg(sitPushPosFL, -10, length, CMouseLeg::Stance);
+    tmpFL = LForeLeft.GetNext();
+    tmpFR = LForeRight.GetNext();
+    //Hindlegs
+    LHindLeft.StartLeg(sitPosHL, 0, 1, CMouseLeg::Stance);
+    LHindRight.StartLeg(sitPosHL, 0, 1, CMouseLeg::Stance);
+    tmpHL = LHindLeft.GetNext();
+    tmpHR = LHindRight.GetNext();
+    //first Array index for following values
+    TrottArray[0][A_TIMESTAMP] = 0;
+    //Keep All Motors in position
+    TrottArray[0][A_HINDLEFT_HIP] = tmpHL.leg;
+    TrottArray[0][A_HINDLEFT_KNEE] = tmpHL.coil;
+    TrottArray[0][A_HINDRIGHT_HIP] = tmpHR.leg;
+    TrottArray[0][A_HINDRIGHT_KNEE] = tmpHR.coil;
+    TrottArray[0][A_FORERIGHT_HIP] = tmpFR.leg;
+    TrottArray[0][A_FORERIGHT_KNEE] = tmpFR.coil;
+    TrottArray[0][A_FORELEFT_HIP] = tmpFL.leg;
+    TrottArray[0][A_FORELEFT_KNEE] = tmpFL.coil;
+    TrottArray[0][A_SPINE_FLEX] = sitPosSpineFlex;
+    TrottArray[0][A_TAIL] = sitPosTail;
+    TrottArray[0][A_SPINE] = sitPosSpine;
+    TrottArray[0][A_HEAD_PAN] = sitPosHeadPan;
+    TrottArray[0][A_HEAD_TILT] = sitPosHeadTilt;
+
+
+    for (int i=1; i<length; i++)
+    {
+        TrottArray[i][A_TIMESTAMP] = i;
+        //Keep All Motors in position
+        TrottArray[i][A_HINDLEFT_HIP] = TrottArray[i-1][A_HINDLEFT_HIP];
+        TrottArray[i][A_HINDLEFT_KNEE] = TrottArray[i-1][A_HINDLEFT_KNEE];
+        TrottArray[i][A_HINDRIGHT_HIP] = TrottArray[i-1][A_HINDRIGHT_HIP];
+        TrottArray[i][A_HINDRIGHT_KNEE] = TrottArray[i-1][A_HINDRIGHT_KNEE];
+        TrottArray[i][A_SPINE_FLEX] = TrottArray[i-1][A_SPINE_FLEX];
+        TrottArray[i][A_TAIL] = TrottArray[i-1][A_TAIL];
+        TrottArray[i][A_SPINE] = TrottArray[i-1][A_SPINE];
+        TrottArray[i][A_HEAD_PAN] = TrottArray[i-1][A_HEAD_PAN];
+        TrottArray[i][A_HEAD_TILT] = TrottArray[i-1][A_HEAD_TILT];
+
+        //keep forelegs in position
+        tmpFL = LForeLeft.GetNext();
+        TrottArray[i][A_FORELEFT_HIP] = tmpFL.leg;
+        TrottArray[i][A_FORELEFT_KNEE] = tmpFL.coil;
+        tmpFL = LForeRight.GetNext();
+        TrottArray[i][A_FORERIGHT_HIP] = tmpFL.leg;
+        TrottArray[i][A_FORERIGHT_KNEE] = tmpFL.coil;
+
+    }
+}
+
+void CMouseCtrl::LiftHands2(int length){
+    CLegPos tmpFL, tmpFR ,tmpHL, tmpHR;
+    //Forelegs
+    LForeLeft.StartLeg(sitPushPosFL-15, 0, length, CMouseLeg::Stance);
+    LForeRight.StartLeg(sitPushPosFL-15, -10, length, CMouseLeg::Stance);
     tmpFL = LForeLeft.GetNext();
     tmpFR = LForeRight.GetNext();
     //Hindlegs
@@ -1002,11 +1064,11 @@ void CMouseCtrl::PushLever(int length, char side){
     int half = length/2;
     //Forelegs
     if (side == 'l'){
-        LForeLeft.StartLeg((uFrontLegStart+10), 0, half, CMouseLeg::Stance);
-        LForeRight.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
+        LForeLeft.StartLeg((uFrontLegStart+15), 0, half, CMouseLeg::Stance);
+        LForeRight.StartLeg(uFrontLegStart+30, -10, 1, CMouseLeg::Stance);
     }else if (side == 'r') {
-        LForeRight.StartLeg((uFrontLegStart+10), 0, half, CMouseLeg::Stance);
-        LForeLeft.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
+        LForeRight.StartLeg((uFrontLegStart+15), -10, half, CMouseLeg::Stance);
+        LForeLeft.StartLeg(uFrontLegStart+30, 0, 1, CMouseLeg::Stance);
     }
     tmpFL = LForeLeft.GetNext();
     tmpFR = LForeRight.GetNext();
@@ -1065,11 +1127,11 @@ void CMouseCtrl::PushLever(int length, char side){
 
     //Lift hand up again
     if (side == 'l'){
-        LForeLeft.StartLeg(uFrontLegStart, 0, half, CMouseLeg::Swing);
-        LForeRight.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
+        LForeLeft.StartLeg(sitPushPosFL, 0, half, CMouseLeg::Stance);
+        LForeRight.StartLeg(sitPushPosFL, -10, 1, CMouseLeg::Stance);
     }else if (side == 'r') {
-        LForeRight.StartLeg(uFrontLegStart, 0, half, CMouseLeg::Swing);
-        LForeLeft.StartLeg(uFrontLegStart, 0, 1, CMouseLeg::Stance);
+        LForeRight.StartLeg(sitPushPosFL, -10, half, CMouseLeg::Stance);
+        LForeLeft.StartLeg(sitPushPosFL, 0, 1, CMouseLeg::Stance);
     }
 
     for (int i=half; i<length; i++)

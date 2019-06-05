@@ -227,14 +227,14 @@ private:
 
 
     //Sitting Parameters
-    const int sitPosSpine = 180;
+    const int sitPosSpine = 168;
     const int sitPosFL = uFrontLegStart+uStepLengthF;
     const int sitPushPosFL = uFrontLegStart+30;
     const int sitPosHL = 40;
     const int sitPosTail = 180;
     const int sitPosSpineFlex = 130;
     const int sitPosHeadPan = 180;
-    const int sitPosHeadTilt = 180;
+    const int sitPosHeadTilt = 236;
 
     // Motion Storage
     static const int storageBuffer = 10000;
@@ -262,6 +262,7 @@ private:
     void SitDown(int length);
     void Greeting();
     void LiftHands(int length);
+    void LiftHands2(int length);
     void SwitchLever(int length, char side);
 };
 
