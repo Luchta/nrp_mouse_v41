@@ -28,7 +28,7 @@
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-#define DEBUG true
+#define DEBUG false
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,23 +98,23 @@ void CMouseCtrl::Greeting(){
 
 void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone c++
 {
-    int motionlength = 50;
-    //char dir = '0';
-
     int cmd;
+    bool OK = true;
+    //Amount of Waypoints generated per motion:
+    int motionlength = 50;
     int situpDownTime = 80;
     int switchingTime = 20;
     int pushingTime = 20;
     int initTime = 1;
 
-    bool OK = true;
-
+    //get Programm starting time
     StartTime = GetCurTime().count();
 
-    clearArr(); //set everything to 90 deg, to avoid damage.
-
+    //set everything to 180 deg(neutral position) to avoid damage.
+    clearArr();
+    //print greeting message
     Greeting();
-    //while(ros.OK)
+
     while (OK)
     {
         cmd = messages; //just one access to messages per run - not yet atomic!!
@@ -168,8 +168,8 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             messages = 0;
             state = 'h';
             break;
-        case 'f':   //lift both paws
-            std::cout<<"init press both paws"<<std::endl;
+        case 'f':   //press both paws
+            std::cout<<"press both paws"<<std::endl;
             PushBothHands(switchingTime);
             Publish(switchingTime);
             messages = 0;
@@ -203,22 +203,33 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             messages = 0;
             state = 'h';
             break;
-        case 'q':   //quit programm
-            std::cout<<"Quitting"<<std::endl;
-            StopAllMotors();
-            return;
+        case '+':   //increase speed
+            CommandDelay = CommandDelay + 5000;
+            std::cout<<"new Speed: "<<CommandDelay<<"\n";
+            messages = 0;
+            state = 'h';
+            break;
+        case '-':   //decrease speed
+            CommandDelay = CommandDelay - 5000;
+            std::cout<<"new Speed: "<<CommandDelay<<"\n";
+            messages = 0;
+            state = 'h';
+            break;
         case 'm':   //publish motions to uart
             Publish(motionlength);
             break;
         case 'h':   //idle
             usleep(90);
-
             break;
         case 'p':   //save motion data
             StoreFile();
             messages = 0;
             state = 'h';
             break;
+        case 'q':   //quit programm
+            std::cout<<"Quitting"<<std::endl;
+            StopAllMotors();
+            return;
         }
     }
 }
@@ -226,7 +237,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
 void CMouseCtrl::Publish(int length) //print the array values for calculated lengthss
 {
     int i=0;
-    unsigned int CommandDelay = 30000;
+    //unsigned int CommandDelay = 30000;
 
     for(i=0;i<length;i++)
     {

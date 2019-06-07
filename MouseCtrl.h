@@ -199,6 +199,7 @@ private:
     int state = '0';
 
     //Motion Parameters
+    unsigned int CommandDelay = 30000;
     static const int FLift = 25; //height of the foot lift
     static const int HLift = 20; //height of the foot lift
 
