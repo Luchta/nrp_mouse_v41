@@ -32,8 +32,8 @@
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-#define DEBUG true
-#define DEBUG2 true
+#define DEBUG false
+#define DEBUG2 false
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ void CMouseCtrl::Publish(int length) //handle output of the array values for cal
             SendMotorMsgs(i);
             usleep(CommandDelay); //send delay between points
         }
-        //if(Estop){return;} //break
+        if(messages == 's'){return;} //break for EStop
         //Storage
         if ((si+length) > storageBuffer){storeData = false;}
         if (storeData){
@@ -364,6 +364,7 @@ void CMouseCtrl::PlayFile() //handle output of the array values read from file
             ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(InputArray[i][A_HEAD_TILT]), 1);
             usleep(CommandDelay); //send delay between points
         }
+        if(messages == 's'){return;} //break for EStop
     }
 }
 
@@ -560,10 +561,11 @@ void CMouseCtrl::Init(int length) //initalizes all legs to zero position
         tmpLeg = LForeRight.GetNext();
         TrottArray[i][A_FORERIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][A_FORERIGHT_KNEE] = tmpLeg.coil;
-
         TrottArray[i][A_SPINE] = tmpSpine.spine;
         TrottArray[i][A_TAIL] = tmpSpine.tail;
         TrottArray[i][A_SPINE_FLEX] = 180;
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
 }
@@ -622,6 +624,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
         if (tail) {TrottArray[i][A_TAIL] = Spine.moveTailLeft(halfMotion);}
         else {TrottArray[i][A_TAIL] = tmpSpine.tail;}
         TrottArray[i][A_SPINE_FLEX] = Spine.stretch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
     // Setting Leg Goals starting with Left leg forward
@@ -650,6 +654,8 @@ void CMouseCtrl::Trot(int motionlength) //calculates trott gait
         if (tail) {TrottArray[i][A_TAIL] = Spine.moveTailRight(motionlength-halfMotion);}
         else {TrottArray[i][A_TAIL] = tmpSpine.tail;}
         TrottArray[i][A_SPINE_FLEX] = Spine.stretch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
 }
@@ -801,6 +807,8 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_SPINE] = tmpSpine.spine;
         TrottArray[i][A_TAIL] = tmpSpine.tail;
         TrottArray[i][A_SPINE_FLEX] = Spine.crouch(); //Spine crouched until hindlegs move
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
     // POINT2 -----------------------------------------------------------------------
@@ -830,6 +838,8 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_SPINE] = tmpSpine.spine;
         TrottArray[i][A_TAIL] = tmpSpine.tail;
         TrottArray[i][A_SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
     // POINT3 -----------------------------------------------------------------------
@@ -858,6 +868,8 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_SPINE] = tmpSpine.spine;
         TrottArray[i][A_TAIL] = tmpSpine.tail;
         TrottArray[i][A_SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
     // POINT4 (end)-----------------------------------------------------------------------
@@ -887,6 +899,8 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_SPINE] = tmpSpine.spine;
         TrottArray[i][A_TAIL] = tmpSpine.tail;
         TrottArray[i][A_SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 
 

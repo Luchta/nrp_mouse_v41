@@ -213,6 +213,8 @@ private:
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
     const int uPosSpineFlexRelax = 180;
+    const int uPosHeadPan = 180;
+    const int uPosHeadTilt = 202;
 
     //Sitting Parameters
     const int sitPosSpine = 168;
@@ -222,6 +224,9 @@ private:
     const int sitPosSpineFlex = 130;
     const int sitPosHeadPan = 180;
     const int sitPosHeadTilt = 236;
+
+    //Bound Parameters
+    static const int FLiftHigh = 35; //height of the foot lift
 
 
     //Head Parameters
