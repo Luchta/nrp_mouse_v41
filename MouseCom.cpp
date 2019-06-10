@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include <cstring>
-#include <stdio.h>
+#include <stdio.h> //strtok
 #include <iostream>
 
 //Parsing defines for command lengths
@@ -95,7 +95,6 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
         std::cerr << "Error - Unknwon UART Send Request!" << std::endl;
         break;
     }
-
 }
 
 //PRIVATE/////////////////////////////////////////////////////////////////////////////////////////////

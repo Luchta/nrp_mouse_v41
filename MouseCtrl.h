@@ -197,6 +197,7 @@ private:
 
     //Global Variables
     int state = '0';
+    bool Estop = false;
 
     //Motion Parameters
     unsigned int CommandDelay = 30000;
@@ -222,6 +223,11 @@ private:
     const int sitPosHeadPan = 180;
     const int sitPosHeadTilt = 236;
 
+
+    //Head Parameters
+    const int uPosHeadPanCentre = 180;
+    const int uPosHeadTiltCentre = 236;
+
     //Lever Pressing Parameters
     const int sitStrechPosFL = -7;
     const int sitPushPosFL = uFrontLegStart+30;
@@ -237,6 +243,13 @@ private:
     int fileNr = 0; //File index
     long int StartTime;
 
+    // Motion Reading from File
+    static const int inputBuffer = 10000;
+    static const int infovariables = 2; //time, cmd
+    double InputArray[inputBuffer][Motors+infovariables];
+    int uMotionLines = 0;
+
+
     //FUNCTIONS
     //Control
     void Greeting();
@@ -248,6 +261,9 @@ private:
     //storage
     void Store(int i);
     void StoreFile();
+    void ReadFile();
+    void PlayFile();
+
     std::chrono::milliseconds GetCurTime();
     //array fkts
     void clearStoreArr();
@@ -256,6 +272,7 @@ private:
     void Trot(int motionlength);
     void Init(int length = 1);
     void TrotBkw(int motionlength);
+    void Bound(int motionlength);
     //Sitting
     void SitDown(int length);
     void SitUp(int length);

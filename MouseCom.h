@@ -37,6 +37,7 @@ public:
     void setConsoleCcmnd(typCmd cmd, int val1=0, int val2=0, int val3=0);
     void ProcessSpine(typCmd cmd, int val1, int val2=0, int val3=0);
 
+
     //OLD COMMUNICATION
     void setMotorOFF(int id);
     void setMotorPwrOFF();
