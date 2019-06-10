@@ -119,6 +119,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
     bool OK = true;
     //Amount of Waypoints generated per motion:
     int motionlength = 50;
+    int boundlength = 20;
     int situpDownTime = 80;
     int switchingTime = 20;
     int pushingTime = 20;
@@ -148,7 +149,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             messages = 0;
             state = 'h';
             break;
-        case 'w': //walk forward
+        case 'w': //walk forward+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             dir = Fwd;
             std::cout << "Straight ahead" << std::endl;
             Trot(motionlength);
@@ -176,14 +177,14 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             messages = 0;
             state = 'm';
             break;
-        case 'b':   //Bound Gait
+        case 'b':   //Bound Gait+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             std::cout<<"Bound"<<std::endl;
-            Bound(motionlength);
-            Publish(motionlength);
+            Bound(boundlength);
+            Publish(boundlength);
             messages = 0;
             state = 'm';
             break;
-        case 'y':   //Sitting
+        case 'y':   //Sitting+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             std::cout<<"Sitting"<<std::endl;
             SitUp(situpDownTime);
             Publish(situpDownTime);
@@ -225,7 +226,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             messages = 0;
             state = 'h';
             break;
-        case '+':   //increase speed
+        case '+':   //increase speed+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             CommandDelay = CommandDelay + 5000;
             std::cout<<"new Speed: "<<CommandDelay<<"\n";
             messages = 0;
@@ -244,7 +245,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             dir = stop;
             usleep(90);
             break;
-        case 'p':   //save motion data
+        case 'p':   //save motion data++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             StoreFile();
             messages = 0;
             state = 'h';
@@ -320,8 +321,8 @@ void CMouseCtrl::SendMotorMsgs(int i) // send Motor commands to MouseCom
     ProcessSpine(SetMotorPos, ID_SPINE, Remap(TrottArray[i][A_SPINE]), 1);
     ProcessSpine(SetMotorPos, ID_TAIL, Remap(TrottArray[i][A_TAIL]), 1);
     ProcessSpine(SetMotorPos, ID_SPINE_FLEX, Remap(TrottArray[i][A_SPINE_FLEX]), 1);
-    //ProcessSpine(SetMotorPos, ID_HEAD_PAN, Remap(TrottArray[i][A_HEAD_PAN]), 1);
-    //ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(TrottArray[i][A_HEAD_TILT]), 1);
+    ProcessSpine(SetMotorPos, ID_HEAD_PAN, Remap(TrottArray[i][A_HEAD_PAN]), 1);
+    ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(TrottArray[i][A_HEAD_TILT]), 1);
 }
 
 void CMouseCtrl::PlayFile() //handle output of the array values read from file
@@ -792,13 +793,13 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
     //calculate Servo Values and write the points to TrottArray
     for (i=0; i<Point1; i++)
     {
-        TrottArray[i][A_TIMESTAMP] = i;
+        /*TrottArray[i][A_TIMESTAMP] = i;
         tmp = LHindLeft.GetNext();
         TrottArray[i][A_HINDLEFT_HIP] = tmp.leg;
         TrottArray[i][A_HINDLEFT_KNEE] = tmp.coil;
         tmp = LHindRight.GetNext();
         TrottArray[i][A_HINDRIGHT_HIP] = tmp.leg;
-        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;
+        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;*/
         tmp = LForeLeft.GetNext();
         TrottArray[i][A_FORELEFT_HIP] = tmp.leg;
         TrottArray[i][A_FORELEFT_KNEE] = tmp.coil;
@@ -819,19 +820,19 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
     LHindLeft.StartLeg((uStepLengthH+uHindLegStart)/2, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     LHindRight.StartLeg((uStepLengthH+uHindLegStart)/2, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     //Fore
-    LForeLeft.StartLeg((40+uFrontLegStart-10)/2, (FLiftHigh/2), PointDuration, CMouseLeg::Stance);
-    LForeRight.StartLeg((40+uFrontLegStart-10)/2, (FLiftHigh/2), PointDuration, CMouseLeg::Stance);
+    LForeLeft.StartLeg((uFrontLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeRight.StartLeg((uFrontLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=Point1; i<Point2; i++)
     {
         TrottArray[i][A_TIMESTAMP] = i;
-        tmp = LHindLeft.GetNext();
+        /*tmp = LHindLeft.GetNext();
         TrottArray[i][A_HINDLEFT_HIP] = tmp.leg;
         TrottArray[i][A_HINDLEFT_KNEE] = tmp.coil;
         tmp = LHindRight.GetNext();
         TrottArray[i][A_HINDRIGHT_HIP] = tmp.leg;
-        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;
+        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;*/
         tmp = LForeLeft.GetNext();
         TrottArray[i][A_FORELEFT_HIP] = tmp.leg;
         TrottArray[i][A_FORELEFT_KNEE] = tmp.coil;
@@ -844,7 +845,7 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
         TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
-
+/*
     // POINT3 -----------------------------------------------------------------------
     // Setting Leg Goals starting with Left leg forward
     //Hind
@@ -907,7 +908,7 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
         TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
-
+*/
 
 }
 
@@ -1393,8 +1394,8 @@ void CMouseCtrl::clearArr(){    //clear the TrottArray
         TrottArray[i][A_SPINE] = centrePos ;
         TrottArray[i][A_TAIL] = centrePos ;
         TrottArray[i][A_SPINE_FLEX] = centrePos ;
-        TrottArray[i][A_HEAD_PAN] = centrePos ;
-        TrottArray[i][A_HEAD_TILT] = centrePos ;
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
 }
 
