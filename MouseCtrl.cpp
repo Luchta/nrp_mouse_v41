@@ -32,7 +32,7 @@
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-#define DEBUG false
+#define DEBUG true
 #define DEBUG2 false
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,7 +406,7 @@ void CMouseCtrl::Store(int i){
     StoreArray[si+i][A_TAIL] = TrottArray[i][A_TAIL];
     StoreArray[si+i][A_SPINE_FLEX] = TrottArray[i][A_SPINE_FLEX];
     StoreArray[si+i][A_HEAD_PAN] = TrottArray[i][A_HEAD_PAN];
-    StoreArray[si+i][A_HEAD_PAN] = TrottArray[i][A_HEAD_PAN];
+    StoreArray[si+i][A_HEAD_TILT] = TrottArray[i][A_HEAD_TILT];
     StoreArray[si+i][14] = state;
 }
 
@@ -787,19 +787,19 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
     LHindLeft.StartLeg(uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     LHindRight.StartLeg(uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     //Fore
-    LForeLeft.StartLeg(uFrontLegStart-10, FLiftHigh, PointDuration, CMouseLeg::Stance);
-    LForeRight.StartLeg(uFrontLegStart-10, FLiftHigh, PointDuration, CMouseLeg::Stance);
+    LForeLeft.StartLeg(uFrontLegStart-10, uFWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeRight.StartLeg(uFrontLegStart-10, uFWalkLevel, PointDuration, CMouseLeg::Stance);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=0; i<Point1; i++)
     {
-        /*TrottArray[i][A_TIMESTAMP] = i;
+        TrottArray[i][A_TIMESTAMP] = i;
         tmp = LHindLeft.GetNext();
         TrottArray[i][A_HINDLEFT_HIP] = tmp.leg;
         TrottArray[i][A_HINDLEFT_KNEE] = tmp.coil;
         tmp = LHindRight.GetNext();
         TrottArray[i][A_HINDRIGHT_HIP] = tmp.leg;
-        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;*/
+        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;
         tmp = LForeLeft.GetNext();
         TrottArray[i][A_FORELEFT_HIP] = tmp.leg;
         TrottArray[i][A_FORELEFT_KNEE] = tmp.coil;
@@ -817,11 +817,11 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
 
     // Setting Leg Goals starting with Left leg forward
     //Hind
-    LHindLeft.StartLeg((uStepLengthH+uHindLegStart)/2, uHWalkLevel, PointDuration, CMouseLeg::Stance);
-    LHindRight.StartLeg((uStepLengthH+uHindLegStart)/2, uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    LHindLeft.StartLeg((uHindLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    LHindRight.StartLeg((uHindLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
     //Fore
-    LForeLeft.StartLeg((uFrontLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
-    LForeRight.StartLeg((uFrontLegStart), uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeLeft.StartLeg((uStepLengthF+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeRight.StartLeg((uStepLengthF+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=Point1; i<Point2; i++)
@@ -845,15 +845,15 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
         TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
-/*
+
     // POINT3 -----------------------------------------------------------------------
     // Setting Leg Goals starting with Left leg forward
     //Hind
     LHindLeft.StartLeg(uStepLengthH+uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     LHindRight.StartLeg(uStepLengthH+uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Stance);
     //Frre
-    LForeLeft.StartLeg((40+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
-    LForeRight.StartLeg((40+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeLeft.StartLeg((uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Swing);
+    LForeRight.StartLeg((uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Swing);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=Point2; i<Point3; i++)
@@ -881,10 +881,10 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
     // POINT4 (end)-----------------------------------------------------------------------
 
     // Setting Leg Goals starting with Left leg forward
-    LHindLeft.StartLeg((uStepLengthH+uHindLegStart)/2, HLift, PointDuration, CMouseLeg::Stance);
-    LHindRight.StartLeg((uStepLengthH+uHindLegStart)/2, HLift, PointDuration, CMouseLeg::Stance);
-    LForeLeft.StartLeg((40+uFrontLegStart), FLiftHigh, PointDuration, CMouseLeg::Stance);
-    LForeRight.StartLeg((40+uFrontLegStart), FLiftHigh, PointDuration, CMouseLeg::Stance);
+    LHindLeft.StartLeg((uHindLegStart), HLift, PointDuration, CMouseLeg::Swing);
+    LHindRight.StartLeg((uHindLegStart), HLift, PointDuration, CMouseLeg::Swing);
+    LForeLeft.StartLeg((uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeRight.StartLeg((uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
 
     //calculate Servo Values and write the points to TrottArray
     for (i=Point3; i<motionlength; i++)
@@ -908,8 +908,6 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
         TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
         TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
-*/
-
 }
 
 
@@ -1391,9 +1389,9 @@ void CMouseCtrl::clearArr(){    //clear the TrottArray
         tmpLeg = LForeRight.GetNext();
         TrottArray[i][A_FORERIGHT_HIP] = tmpLeg.leg;
         TrottArray[i][A_FORERIGHT_KNEE] = tmpLeg.coil;
-        TrottArray[i][A_SPINE] = centrePos ;
-        TrottArray[i][A_TAIL] = centrePos ;
-        TrottArray[i][A_SPINE_FLEX] = centrePos ;
+        TrottArray[i][A_SPINE] = centrePos;
+        TrottArray[i][A_TAIL] = centrePos;
+        TrottArray[i][A_SPINE_FLEX] = centrePos;
         TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
         TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
     }
