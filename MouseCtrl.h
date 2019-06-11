@@ -287,6 +287,7 @@ private:
     void PushBothHands(int length);
     void LiftBothHands(int length);
     //void SwitchLever(int length, char side);
+    void Bound2(int motionlength);
 };
 
 #ifdef ROS

@@ -34,11 +34,29 @@
 #define A_HEAD_PAN 12
 #define A_HEAD_TILT 13
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//defines for Motors in File Array
+#define F_TIMESTAMP 0
+#define F_TIME 1
+#define F_FORELEFT_HIP 2
+#define F_FORELEFT_KNEE 3
+#define F_FORERIGHT_HIP 4
+#define F_FORERIGHT_KNEE 5
+#define F_HINDLEFT_HIP 6
+#define F_HINDLEFT_KNEE 7
+#define F_HINDRIGHT_HIP 8
+#define F_HINDRIGHT_KNEE 9
+#define F_SPINE 10
+#define F_TAIL 11
+#define F_SPINE_FLEX 12
+#define F_HEAD_PAN 13
+#define F_HEAD_TILT 14
+
 // motion is created via motionarray
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
-#define DEBUG true
-#define DEBUG2 true
+#define DEBUG false
+#define DEBUG2 false
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +122,7 @@ void CMouseCtrl::Greeting(){
     std::cout<<"a: Walk right the more the often you press\n";
     std::cout<<"d: Walk left the more the often you press\n";
     std::cout<<"b: Walk forward Bound\n";
+    std::cout<<"n: Walk forward Bound2\n";
     std::cout<<"Sitting:--------------------------\n";
     std::cout<<"y: Sit up\n";
     std::cout<<"f: Press both paws up\n";
@@ -185,6 +204,13 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
         case 'b':   //Bound Gait+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             std::cout<<"Bound"<<std::endl;
             Bound(boundlength);
+            Publish(boundlength);
+            messages = 0;
+            state = 'm';
+            break;
+        case 'n':   //Bound Gait+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            std::cout<<"Bound2"<<std::endl;
+            Bound2(boundlength);
             Publish(boundlength);
             messages = 0;
             state = 'm';
@@ -292,7 +318,7 @@ void CMouseCtrl::Publish(int length) //handle output of the array values for cal
             SendMotorMsgs(i);
             usleep(CommandDelay); //send delay between points
         }
-        if(messages == 's'){return;} //break for EStop
+        if(messages == 's'){std::cout << "EStop in Publish!\n";return;} //break for EStop
         //Storage
         if ((si+length) > storageBuffer){storeData = false;}
         if (storeData){
@@ -339,40 +365,41 @@ void CMouseCtrl::PlayFile() //handle output of the array values read from file
     for(i=0;i<uMotionLines;i++)
     {
         if (DEBUG){
-            std::cout   << InputArray[i][0] << "; TS:"
-                                            << InputArray[i][A_TIMESTAMP+1] << "; FLH:"
-                                            << InputArray[i][A_FORELEFT_HIP+1] << "; FLK:"
-                                            << InputArray[i][A_FORELEFT_KNEE+1] << "; FRH:"
-                                            << InputArray[i][A_FORERIGHT_HIP+1] << "; FRK:"
-                                            << InputArray[i][A_FORERIGHT_KNEE+1] << "; HLH:"
-                                            << InputArray[i][A_HINDLEFT_HIP+1] << "; HLK:"
-                                            << InputArray[i][A_HINDLEFT_KNEE+1] << "; HRH:"
-                                            << InputArray[i][A_HINDRIGHT_HIP+1] << "; HRK:"
-                                            << InputArray[i][A_HINDRIGHT_KNEE+1] << "; SPI:"
-                                            << InputArray[i][A_SPINE+1] << "; TAL:"
-                                            << InputArray[i][A_TAIL+1] << "; SPF:"
-                                            << InputArray[i][A_SPINE_FLEX+1] << "; HP:"
-                                            << InputArray[i][A_HEAD_PAN+1] << "; HT: "
-                                            << InputArray[i][A_HEAD_TILT+1] << "\n ";
+            std::cout   << InputArray[i][F_TIMESTAMP] << "; TS:"
+                                            << InputArray[i][F_TIME] << "; FLH:"
+                                            << InputArray[i][F_FORELEFT_HIP] << "; FLK:"
+                                            << InputArray[i][F_FORELEFT_KNEE] << "; FRH:"
+                                            << InputArray[i][F_FORERIGHT_HIP] << "; FRK:"
+                                            << InputArray[i][F_FORERIGHT_KNEE] << "; HLH:"
+                                            << InputArray[i][F_HINDLEFT_HIP] << "; HLK:"
+                                            << InputArray[i][F_HINDLEFT_KNEE] << "; HRH:"
+                                            << InputArray[i][F_HINDRIGHT_HIP] << "; HRK:"
+                                            << InputArray[i][F_HINDRIGHT_KNEE] << "; SPI:"
+                                            << InputArray[i][F_SPINE] << "; TAL:"
+                                            << InputArray[i][F_TAIL] << "; SPF:"
+                                            << InputArray[i][F_SPINE_FLEX] << "; HP:"
+                                            << InputArray[i][F_HEAD_PAN] << "; HT: "
+                                            << InputArray[i][F_HEAD_TILT] << "\n ";
             usleep(CommandDelay); //send delay between points
         }else {
-            ProcessSpine(SetMotorPos, ID_FORELEFT_HIP, Remap(InputArray[i][A_FORELEFT_HIP]), 1);
-            ProcessSpine(SetMotorPos, ID_FORELEFT_KNEE, Remap(InputArray[i][A_FORELEFT_KNEE]), 1);
-            ProcessSpine(SetMotorPos, ID_FORERIGHT_HIP, Remap(InputArray[i][A_FORERIGHT_HIP]), 1);
-            ProcessSpine(SetMotorPos, ID_FORERIGHT_KNEE, Remap(InputArray[i][A_FORERIGHT_KNEE]), 1);
-            ProcessSpine(SetMotorPos, ID_HINDLEFT_HIP, Remap(InputArray[i][A_HINDLEFT_HIP]), 1);
-            ProcessSpine(SetMotorPos, ID_HINDLEFT_KNEE, Remap(InputArray[i][A_HINDLEFT_KNEE]), 1);
-            ProcessSpine(SetMotorPos, ID_HINDRIGHT_HIP, Remap(InputArray[i][A_HINDRIGHT_HIP]), 1);
-            ProcessSpine(SetMotorPos, ID_HINDRIGHT_KNEE, Remap(InputArray[i][A_HINDRIGHT_KNEE]), 1);
-            ProcessSpine(SetMotorPos, ID_SPINE, Remap(InputArray[i][A_SPINE]), 1);
-            ProcessSpine(SetMotorPos, ID_TAIL, Remap(InputArray[i][A_TAIL]), 1);
-            ProcessSpine(SetMotorPos, ID_SPINE_FLEX, Remap(InputArray[i][A_SPINE_FLEX]), 1);
-            ProcessSpine(SetMotorPos, ID_HEAD_PAN, Remap(InputArray[i][A_HEAD_PAN]), 1);
-            ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(InputArray[i][A_HEAD_TILT]), 1);
+            ProcessSpine(SetMotorPos, ID_FORELEFT_HIP, Remap(InputArray[i][F_FORELEFT_HIP]), 1);
+            ProcessSpine(SetMotorPos, ID_FORELEFT_KNEE, Remap(InputArray[i][F_FORELEFT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, ID_FORERIGHT_HIP, Remap(InputArray[i][F_FORERIGHT_HIP]), 1);
+            ProcessSpine(SetMotorPos, ID_FORERIGHT_KNEE, Remap(InputArray[i][F_FORERIGHT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, ID_HINDLEFT_HIP, Remap(InputArray[i][F_HINDLEFT_HIP]), 1);
+            ProcessSpine(SetMotorPos, ID_HINDLEFT_KNEE, Remap(InputArray[i][F_HINDLEFT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, ID_HINDRIGHT_HIP, Remap(InputArray[i][F_HINDRIGHT_HIP]), 1);
+            ProcessSpine(SetMotorPos, ID_HINDRIGHT_KNEE, Remap(InputArray[i][F_HINDRIGHT_KNEE]), 1);
+            ProcessSpine(SetMotorPos, ID_SPINE, Remap(InputArray[i][F_SPINE]), 1);
+            ProcessSpine(SetMotorPos, ID_TAIL, Remap(InputArray[i][F_TAIL]), 1);
+            ProcessSpine(SetMotorPos, ID_SPINE_FLEX, Remap(InputArray[i][F_SPINE_FLEX]), 1);
+            ProcessSpine(SetMotorPos, ID_HEAD_PAN, Remap(InputArray[i][F_HEAD_PAN]), 1);
+            ProcessSpine(SetMotorPos, ID_HEAD_TILT, Remap(InputArray[i][F_HEAD_TILT]), 1);
             usleep(CommandDelay); //send delay between points
         }
-        if(messages == 's'){return;} //break for EStop
+        if(messages == 's'){std::cout << "EStop in Playback!\n"; return;} //break for EStop
     }
+    std::cout << "played file\n";
 }
 
 
@@ -463,7 +490,6 @@ void CMouseCtrl::StoreFile() //print the array values for calculated lengthss
 
 }
 
-#if 1
 void CMouseCtrl::ReadFile()
 {
     std::ifstream infile;
@@ -508,68 +534,8 @@ void CMouseCtrl::ReadFile()
         std::cerr << "File could not be opened!\n";
     }
     uMotionLines = linecount;
+    std::cout << "Data Read!\n";
 }
-#else
-void CMouseCtrl::ReadFile()
-{
-    std::ifstream infile;
-    const int MAX_ARG_PER_LINE = Motors+infovariables;
-    const int MAX_ARG_LENGTH = 50;
-    const int MAX_LINE_LENGTH = 5000;
-    char InputBuffer[MAX_LINE_LENGTH];
-    char SperatedInput[MAX_ARG_PER_LINE][MAX_ARG_LENGTH];
-    //int inputLineLength = 1000;
-    int linecount = 0;
-    int i, count;
-    char const separator = ';';
-
-    infile.open ("retargeting.txt");
-    if (infile.is_open())
-    {
-        // get one line of File
-        std::cout << "File opened!\n";
-        //while(infile.eof())
-            while(infile.getline(InputBuffer, MAX_LINE_LENGTH))
-            {
-                InputBuffer[MAX_LINE_LENGTH-1] = '\0';
-                if (DEBUG2){printf("File - %i bytes read : %s\n", MAX_LINE_LENGTH, InputBuffer);}
-                //parse to input values
-                //reset i and count
-                i = 0;
-                count = 0;
-                //seperate stringinputLineLength
-                char *token = strtok(InputBuffer, &separator);
-                while ((i < MAX_ARG_PER_LINE) && (token))
-                {
-                    //copy seperated char array to SeperatedInput
-                    strcpy(SperatedInput[i++], token);
-                    token = strtok(nullptr, &separator);
-                    count++;
-                }
-                //convert to float and store
-                if (count == 0 || count < 0)
-                {
-                    //no Arguments read
-                    std::cerr << "Error: empty input count in line "<< linecount <<"\n";
-                }else {
-                    for (i=0;i<count;i++) {
-                        InputArray[linecount][i] = atof(SperatedInput[i]); //read string to float
-                        printf("%f,",InputArray[linecount][i]);
-                    }
-                    printf("\n");
-                    linecount++; //increase linecount
-                }
-            }
-
-        infile.close();
-        std::cout << "File closed!\n";
-
-    }else {
-        std::cerr << "File could not be opened!\n";
-    }
-    uMotionLines = linecount;
-}
-#endif
 
 std::chrono::milliseconds CMouseCtrl::GetCurTime(){
     std::chrono::milliseconds ms = std::chrono::duration_cast< std::chrono::milliseconds >(
@@ -970,6 +936,108 @@ void CMouseCtrl::Bound(int motionlength) //calculates trott gait
     }
 }
 
+
+void CMouseCtrl::Bound2(int motionlength) //calculates trott gait
+{
+    // Bound Gait Motion
+    /* From init position
+     * Move Forepaws down
+     * Push Up
+     * Swing forward while hindlegs push backward
+     * set down and move down
+     * move backwards pull hindlegs forward
+     *
+     * repeat
+     *
+     *Foreleg positions:
+     *Fwd Up (uFrontLegStart,FLift)
+     *half down/Bkwd ((uStepLengthF+uFrontLegStart)/2,FLift/2)
+     *Backward down (uStepLengthF+uFrontLegStart, uFWalkLevel)
+     *Backward up (uStepLengthF+uFrontLegStart, FLift)
+     *
+     * Hindleg Positions:
+     * Fwd Down (uHindLegStart,uHWalkLevel)
+     * half bkwdDwon ((uStepLengthH+uHindLegStart)/2, uHWalkLevel)
+     * bwkdDown ((uStepLengthH+uHindLegStart), uHWalkLevel)
+     * half fwdup ((uStepLengthH+uHindLegStart)/2, HLift)
+     */
+
+    //Variables
+    int PointDuration = (int)round(motionlength/2);
+
+    int i;
+    CLegPos tmp;
+    CSpinePos tmpSpine;
+
+    tmpSpine = Spine.centre();
+
+    // POINT1 -----------------------------------------------------------------------
+
+    //Setting Goals starting with Right leg forward
+    //Hind
+    LHindLeft.StartLeg(uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Swing);
+    LHindRight.StartLeg(uHindLegStart, uHWalkLevel, PointDuration, CMouseLeg::Swing);
+    //Fore
+    LForeLeft.StartLeg((uStepLengthF+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
+    LForeRight.StartLeg((uStepLengthF+uFrontLegStart), uFWalkLevel, PointDuration, CMouseLeg::Stance);
+
+    //calculate Servo Values and write the points to TrottArray
+    for (i=0; i<PointDuration; i++)
+    {
+        TrottArray[i][A_TIMESTAMP] = i;
+        tmp = LHindLeft.GetNext();
+        TrottArray[i][A_HINDLEFT_HIP] = tmp.leg;
+        TrottArray[i][A_HINDLEFT_KNEE] = tmp.coil;
+        tmp = LHindRight.GetNext();
+        TrottArray[i][A_HINDRIGHT_HIP] = tmp.leg;
+        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;
+        tmp = LForeLeft.GetNext();
+        TrottArray[i][A_FORELEFT_HIP] = tmp.leg;
+        TrottArray[i][A_FORELEFT_KNEE] = tmp.coil;
+        tmp = LForeRight.GetNext();
+        TrottArray[i][A_FORERIGHT_HIP] = tmp.leg;
+        TrottArray[i][A_FORERIGHT_KNEE] = tmp.coil;
+        TrottArray[i][A_SPINE] = tmpSpine.spine;
+        TrottArray[i][A_TAIL] = tmpSpine.tail;
+        TrottArray[i][A_SPINE_FLEX] = Spine.crouch(); //Spine crouched until hindlegs move
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
+    }
+
+    // POINT2 -----------------------------------------------------------------------
+
+    // Setting Leg Goals starting with Left leg forward
+    //Hind
+    LHindLeft.StartLeg((uHindLegStart+uStepLengthH), uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    LHindRight.StartLeg((uHindLegStart+uStepLengthH), uHWalkLevel, PointDuration, CMouseLeg::Stance);
+    //Fore
+    LForeLeft.StartLeg((uFrontLegStart-10), uFWalkLevel, PointDuration, CMouseLeg::Swing);
+    LForeRight.StartLeg((uFrontLegStart-10), uFWalkLevel, PointDuration, CMouseLeg::Swing);
+
+    //calculate Servo Values and write the points to TrottArray
+    for (i=PointDuration; i<motionlength; i++)
+    {
+        TrottArray[i][A_TIMESTAMP] = i;
+        tmp = LHindLeft.GetNext();
+        TrottArray[i][A_HINDLEFT_HIP] = tmp.leg;
+        TrottArray[i][A_HINDLEFT_KNEE] = tmp.coil;
+        tmp = LHindRight.GetNext();
+        TrottArray[i][A_HINDRIGHT_HIP] = tmp.leg;
+        TrottArray[i][A_HINDRIGHT_KNEE] = tmp.coil;
+        tmp = LForeLeft.GetNext();
+        TrottArray[i][A_FORELEFT_HIP] = tmp.leg;
+        TrottArray[i][A_FORELEFT_KNEE] = tmp.coil;
+        tmp = LForeRight.GetNext();
+        TrottArray[i][A_FORERIGHT_HIP] = tmp.leg;
+        TrottArray[i][A_FORERIGHT_KNEE] = tmp.coil;
+        TrottArray[i][A_SPINE] = tmpSpine.spine;
+        TrottArray[i][A_TAIL] = tmpSpine.tail;
+        TrottArray[i][A_SPINE_FLEX] = Spine.crouch();
+        TrottArray[i][A_HEAD_PAN] = uPosHeadPan;
+        TrottArray[i][A_HEAD_TILT] = uPosHeadTilt;
+    }
+
+}
 
 //Sitting++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
