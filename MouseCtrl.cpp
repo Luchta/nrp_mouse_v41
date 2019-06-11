@@ -9,6 +9,11 @@
 //#include <stdio.h> //strtok
 #include <string.h> //strtok
 
+#include <string>
+#include <sstream>
+#include <vector>
+
+
 
 
 
@@ -33,7 +38,7 @@
 // speed is done via amount of points to be published (old setup: 100 values at 500hz?!)
 
 #define DEBUG true
-#define DEBUG2 false
+#define DEBUG2 true
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +256,7 @@ void CMouseCtrl::Ctrl() //control setup - deprecated is only used in stand alone
             state = 'h';
             break;
         case 'o':   //read motion data
+            std::cout<<"reading data"<<std::endl;
             ReadFile();
             messages = 0;
             state = 'h';
@@ -333,21 +339,21 @@ void CMouseCtrl::PlayFile() //handle output of the array values read from file
     for(i=0;i<uMotionLines;i++)
     {
         if (DEBUG){
-            std::cout << InputArray[i][0] << "; TS:"
-                                          << InputArray[i][A_TIMESTAMP+1] << "; FH:"
-                                          << InputArray[i][A_FORELEFT_HIP+1] << "; FK:"
-                                          << InputArray[i][A_FORELEFT_KNEE+1] << "; FH:"
-                                          << InputArray[i][A_FORERIGHT_HIP+1] << "; FK:"
-                                          << InputArray[i][A_FORERIGHT_KNEE+1] << "; HH:"
-                                          << InputArray[i][A_HINDLEFT_HIP+1] << "; HK:"
-                                          << InputArray[i][A_HINDLEFT_KNEE+1] << "; HH:"
-                                          << InputArray[i][A_HINDRIGHT_HIP+1] << "; HK:"
-                                          << InputArray[i][A_HINDRIGHT_KNEE+1] << "; SP:"
-                                          << InputArray[i][A_SPINE+1] << "; T:"
-                                          << InputArray[i][A_TAIL+1] << "; SF:"
-                                          << InputArray[i][A_SPINE_FLEX+1] << "; HP:"
-                                          << InputArray[i][A_HEAD_PAN+1] << "; HT: "
-                                          << InputArray[i][A_HEAD_TILT+1] << "\n ";
+            std::cout   << InputArray[i][0] << "; TS:"
+                                            << InputArray[i][A_TIMESTAMP+1] << "; FLH:"
+                                            << InputArray[i][A_FORELEFT_HIP+1] << "; FLK:"
+                                            << InputArray[i][A_FORELEFT_KNEE+1] << "; FRH:"
+                                            << InputArray[i][A_FORERIGHT_HIP+1] << "; FRK:"
+                                            << InputArray[i][A_FORERIGHT_KNEE+1] << "; HLH:"
+                                            << InputArray[i][A_HINDLEFT_HIP+1] << "; HLK:"
+                                            << InputArray[i][A_HINDLEFT_KNEE+1] << "; HRH:"
+                                            << InputArray[i][A_HINDRIGHT_HIP+1] << "; HRK:"
+                                            << InputArray[i][A_HINDRIGHT_KNEE+1] << "; SPI:"
+                                            << InputArray[i][A_SPINE+1] << "; TAL:"
+                                            << InputArray[i][A_TAIL+1] << "; SPF:"
+                                            << InputArray[i][A_SPINE_FLEX+1] << "; HP:"
+                                            << InputArray[i][A_HEAD_PAN+1] << "; HT: "
+                                            << InputArray[i][A_HEAD_TILT+1] << "\n ";
             usleep(CommandDelay); //send delay between points
         }else {
             ProcessSpine(SetMotorPos, ID_FORELEFT_HIP, Remap(InputArray[i][A_FORELEFT_HIP]), 1);
@@ -457,59 +463,113 @@ void CMouseCtrl::StoreFile() //print the array values for calculated lengthss
 
 }
 
+#if 1
+void CMouseCtrl::ReadFile()
+{
+    std::ifstream infile;
+    std::string st, st2;
+    std::istringstream iss, iss2;
+    std::vector<double> vec;
+    double val;
+    const int MAX_ARG_PER_LINE = 15;
+    int linecount = 0;
+    char const separator = ',';
+
+    infile.open("retargeting.txt");
+    if (infile.is_open())
+    {
+        // get one line of File
+        while (!infile.eof()) {
+            getline(infile, st);
+            if (st.empty()) continue;
+            iss.clear();
+            iss.str(st);
+            vec.clear();
+            while (std::getline(iss, st2, separator)) {
+                //std::cerr << st2 << ",";
+                iss2.str(st2);
+                iss2.clear();
+                iss2 >> val;
+                if (!iss2.fail()) vec.push_back(val);
+            }
+            //std::cerr << std::endl;
+            if (vec.size() != MAX_ARG_PER_LINE) {
+                std::cerr << "format error: " << vec.size() << std ::endl;
+                continue;
+            }
+            for (size_t i = 0; i < vec.size(); i++) {
+                InputArray[linecount][i] = vec.at(i);
+            }
+            linecount++;
+        }
+        infile.close();
+    }
+    else {
+        std::cerr << "File could not be opened!\n";
+    }
+    uMotionLines = linecount;
+}
+#else
 void CMouseCtrl::ReadFile()
 {
     std::ifstream infile;
     const int MAX_ARG_PER_LINE = Motors+infovariables;
     const int MAX_ARG_LENGTH = 50;
-    const int MAX_LINE_LENGTH = 1000;
+    const int MAX_LINE_LENGTH = 5000;
     char InputBuffer[MAX_LINE_LENGTH];
     char SperatedInput[MAX_ARG_PER_LINE][MAX_ARG_LENGTH];
-    int inputLineLength = 1000;
+    //int inputLineLength = 1000;
     int linecount = 0;
     int i, count;
     char const separator = ';';
 
-    infile.open ("motion.txt");
+    infile.open ("retargeting.txt");
     if (infile.is_open())
     {
         // get one line of File
-        while(infile.getline(InputBuffer, inputLineLength))
-        {
-            InputBuffer[inputLineLength] = '\0';
-            if (DEBUG2){printf("File - %i bytes read : %s\n", inputLineLength, InputBuffer);}
-            //parse to input values
-            //reset i and count
-            i = 0;
-            count = 0;
-            //seperate stringinputLineLength
-            char *token = strtok(InputBuffer, &separator);
-            while ((i < MAX_ARG_PER_LINE) && (token))
+        std::cout << "File opened!\n";
+        //while(infile.eof())
+            while(infile.getline(InputBuffer, MAX_LINE_LENGTH))
             {
-                //copy seperated char array to SeperatedInput
-                strcpy(SperatedInput[i++], token);
-                token = strtok(nullptr, &separator);
-                count++;
-            }
-            //convert to float and store
-            if (count == 0 || count < 0)
-            {
-                //no Arguments read
-                std::cerr << "Error: empty input count in line "<< linecount <<"\n";
-            }else {
-                for (i=0;i<count;i++) {
-                    InputArray[linecount][i] = atof(SperatedInput[i]); //read string to float
+                InputBuffer[MAX_LINE_LENGTH-1] = '\0';
+                if (DEBUG2){printf("File - %i bytes read : %s\n", MAX_LINE_LENGTH, InputBuffer);}
+                //parse to input values
+                //reset i and count
+                i = 0;
+                count = 0;
+                //seperate stringinputLineLength
+                char *token = strtok(InputBuffer, &separator);
+                while ((i < MAX_ARG_PER_LINE) && (token))
+                {
+                    //copy seperated char array to SeperatedInput
+                    strcpy(SperatedInput[i++], token);
+                    token = strtok(nullptr, &separator);
+                    count++;
                 }
-                linecount++; //increase linecount
+                //convert to float and store
+                if (count == 0 || count < 0)
+                {
+                    //no Arguments read
+                    std::cerr << "Error: empty input count in line "<< linecount <<"\n";
+                }else {
+                    for (i=0;i<count;i++) {
+                        InputArray[linecount][i] = atof(SperatedInput[i]); //read string to float
+                        printf("%f,",InputArray[linecount][i]);
+                    }
+                    printf("\n");
+                    linecount++; //increase linecount
+                }
             }
-        }
 
         infile.close();
+        std::cout << "File closed!\n";
+
     }else {
         std::cerr << "File could not be opened!\n";
     }
     uMotionLines = linecount;
 }
+#endif
 
 std::chrono::milliseconds CMouseCtrl::GetCurTime(){
     std::chrono::milliseconds ms = std::chrono::duration_cast< std::chrono::milliseconds >(
