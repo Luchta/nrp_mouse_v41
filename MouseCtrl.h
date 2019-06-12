@@ -212,9 +212,9 @@ private:
     const int uFWalkLevel      = 10;//10;  // y walking level of init and walking
     const int uSitting_x      = -30;  // X position for foot in sitting
     const int uSitting_y      = 30;  // Y position for foot in sitting
-    const int uPosSpineFlexRelax = 180;
-    const int uPosHeadPan = 180;
-    const int uPosHeadTilt = 202;
+    const int uPosSpineFlexRelax = 180; //- is flex  NO+!!
+    const int uPosHeadPan = 180; //+ is right
+    const int uPosHeadTilt = 202; //+ is down
 
     //Sitting Parameters
     const int sitPosSpine = 168;
@@ -268,6 +268,9 @@ private:
     void StoreFile();
     void ReadFile();
     void PlayFile();
+    void SendMotorFileMsgs(int i);
+    void PrintFile(int i);
+    void PlayFileReverse();
 
     std::chrono::milliseconds GetCurTime();
     //array fkts
@@ -278,6 +281,7 @@ private:
     void Init(int length = 1);
     void TrotBkw(int motionlength);
     void Bound(int motionlength);
+    void Bound2(int motionlength);
     //Sitting
     void SitDown(int length);
     void SitUp(int length);
@@ -287,7 +291,7 @@ private:
     void PushBothHands(int length);
     void LiftBothHands(int length);
     //void SwitchLever(int length, char side);
-    void Bound2(int motionlength);
+
 };
 
 #ifdef ROS
