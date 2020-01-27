@@ -12,6 +12,11 @@
 #include <string>
 #include <sstream>
 #include <vector>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 6d0ec7e053ed837e5c5f0e12bd639245c389fc5d
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global flags and names
@@ -545,7 +550,11 @@ void CMouseCtrl::ReadFile()
     int linecount = 0;
     char const separator = ',';
 
+<<<<<<< HEAD
     infile.open(FILENAME);
+=======
+    infile.open("motions/bound_1.txt");
+>>>>>>> 6d0ec7e053ed837e5c5f0e12bd639245c389fc5d
     if (infile.is_open())
     {
         // get one line of File
@@ -556,11 +565,16 @@ void CMouseCtrl::ReadFile()
             iss.str(st);
             vec.clear();
             while (std::getline(iss, st2, separator)) {
+<<<<<<< HEAD
                 //std::cerr << st2 << ",";
+=======
+                std::cerr << st2 << ",";
+>>>>>>> 6d0ec7e053ed837e5c5f0e12bd639245c389fc5d
                 iss2.str(st2);
                 iss2.clear();
                 iss2 >> val;
                 if (!iss2.fail()) vec.push_back(val);
+<<<<<<< HEAD
             }
             //std::cerr << std::endl;
             if (vec.size() != MAX_ARG_PER_LINE) {
@@ -570,6 +584,17 @@ void CMouseCtrl::ReadFile()
             for (size_t i = 0; i < vec.size(); i++) {
                 InputArray[linecount][i] = vec.at(i);
             }
+=======
+            }
+            std::cerr << std::endl;
+            if (vec.size() != MAX_ARG_PER_LINE) {
+                std::cerr << "format error: " << vec.size() << std ::endl;
+                continue;
+            }
+            for (size_t i = 0; i < vec.size(); i++) {
+                InputArray[linecount][i] = vec.at(i);
+            }
+>>>>>>> 6d0ec7e053ed837e5c5f0e12bd639245c389fc5d
             linecount++;
         }
         infile.close();
