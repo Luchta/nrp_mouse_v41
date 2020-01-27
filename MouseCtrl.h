@@ -155,19 +155,21 @@ public:
     CMouseCtrl();
     virtual ~CMouseCtrl() {}
     //defines for Motor IDs
-#define ID_FORELEFT_HIP 00
-#define ID_FORELEFT_KNEE 01
-#define ID_HINDLEFT_HIP 10
-#define ID_HINDLEFT_KNEE 11
-#define ID_FORERIGHT_HIP 20
-#define ID_FORERIGHT_KNEE 21
-#define ID_HINDRIGHT_HIP 30
-#define ID_HINDRIGHT_KNEE 31
-#define ID_SPINE_FLEX 40
-#define ID_SPINE 41
-#define ID_TAIL 42
-#define ID_HEAD_PAN 43
-#define ID_HEAD_TILT 44
+    //Nermo 4.1 Spine row: 2; Left side:0; Right side: 1
+
+#define ID_HINDLEFT_HIP 01
+#define ID_HINDLEFT_KNEE 00
+#define ID_FORELEFT_HIP 03
+#define ID_FORELEFT_KNEE 02
+#define ID_HINDRIGHT_HIP 11
+#define ID_HINDRIGHT_KNEE 10
+#define ID_FORERIGHT_HIP 13
+#define ID_FORERIGHT_KNEE 12
+#define ID_SPINE_FLEX 20
+#define ID_SPINE 21
+#define ID_TAIL 22
+#define ID_HEAD_PAN 23
+#define ID_HEAD_TILT 24
 
     //VARIABLES
     int messages; // message to UI thread
@@ -176,7 +178,7 @@ public:
     static const int Motors = 13;
     double TrottArray[ArrayBuffer][Motors+1];
 
-    int MotorID[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
+    int MotorID[13] = {00,01,02,03,10,11,12,13,20,21,22,23,24}; //list to call all motors at once
 
     typedef enum Direction{ Fwd, Bkwd, left, right, stop, stance} typDir;
     typDir dir = stop;
