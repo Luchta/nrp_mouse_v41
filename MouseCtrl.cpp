@@ -544,7 +544,7 @@ void CMouseCtrl::ReadFile()
     int linecount = 0;
     char const separator = ',';
 
-    infile.open("motions/bound_1.txt");
+    infile.open("motions/motion.txt");
     if (infile.is_open())
     {
         // get one line of File
