@@ -110,7 +110,7 @@ void CMouseCom::MotorSetup()
 		sendUartMessage(buffer,l);
 		usleep(10000); //safety delay to avoid collisions
 	}
-	setMotorPID();
+	//setMotorPID();
 }
 
 
