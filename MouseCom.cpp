@@ -101,7 +101,7 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
 //Motor Setup---------------------------------------------------------------------------------------
 void CMouseCom::MotorSetup()
 {
-    int Motor[13] = {00,01,10,11,20,21,30,31,40,41,42,43,44};
+    int Motor[13] = {00,01,02,03,10,11,12,13,20,21,22,23,24};
     int l;
     char buffer [18];
 
