@@ -101,31 +101,16 @@ void CMouseCom::ProcessSpine(CMouseCom::typCmd cmd, int val1, int val2, int val3
 //Motor Setup---------------------------------------------------------------------------------------
 void CMouseCom::MotorSetup()
 {
-    int Motor[13] = {00,01,02,03,10,11,12,13,20,21,22,23,24};
     int l;
     char buffer [18];
 
-    for (int i=0;i<13;i++) {
-        //Set Motors Silent
-        l = sprintf (buffer, ":%02d!U-\n", Motor[i]);
-        sendUartMessage(buffer,l);
-        usleep(10000); //safety delay to avoid collisions
-        
-	//Set PID Values
-        // P
-        l = sprintf (buffer, ":%02d!CP=%03x0\n", Motor[i], MotorP);
-        sendUartMessage(buffer,l);
-        usleep(5000); //safety delay to avoid collisions
-        // I
-        l = sprintf (buffer, ":%02d!CI=%03x0\n", Motor[i], MotorI);
-        sendUartMessage(buffer,l);
-        usleep(5000); //safety delay to avoid collisions
-        // D
-        l = sprintf (buffer, ":%02d!CD=%03x0\n", Motor[i], MotorD);
-        sendUartMessage(buffer,l);
-        usleep(5000); //safety delay to avoid collisions
-    	
-    }
+	for (int i=0;i<13;i++) {
+		//Set Motors Silent
+		l = sprintf (buffer, ":%02d!U-\n", Motors[i]);
+		sendUartMessage(buffer,l);
+		usleep(10000); //safety delay to avoid collisions
+	}
+	setMotorPID();
 }
 
 
@@ -215,27 +200,26 @@ void CMouseCom::setMotorSilent(int id, int val1)
     sendUartMessage(buffer,l);
 }
 
-void CMouseCom::setMotorPID(int id, int val1, int val2)
+void CMouseCom::setMotorPID()
 {
-    //------ form string------
-    //TODO remove last 0 when reprogramming servos
     int l;
     char buffer [18];
-    //string: ":ID!L=STATE"
-    if (val1 == 'P') {
-        //switch on
-        l = sprintf (buffer, ":%02d!CP=%03x0\n", id, val2);
-    }else if (val1 == 'I'){
-        //set off
-        l = sprintf (buffer, ":%02d!CI=%03x0\n", id, val2);
-    }else if (val1 == 'D') {
-        //set frequency
-        l = sprintf (buffer, ":%02d!CD=%03x0\n", id, val2);
-    }else {
-        return;
-    }
-    //send
-    sendUartMessage(buffer,l);
+
+	for (int i=0;i<13;i++) {
+		//Set PID Values
+		// P
+		l = sprintf (buffer, ":%02d!CP=%03x0\n", Motors[i], MotorP);
+		sendUartMessage(buffer,l);
+		usleep(5000); //safety delay to avoid collisions
+		// I
+		l = sprintf (buffer, ":%02d!CI=%03x0\n", Motors[i], MotorI);
+		sendUartMessage(buffer,l);
+		usleep(5000); //safety delay to avoid collisions
+		// D
+		l = sprintf (buffer, ":%02d!CD=%03x0\n", Motors[i], MotorD);
+		sendUartMessage(buffer,l);
+		usleep(5000); //safety delay to avoid collisions
+	}
 }
 
 

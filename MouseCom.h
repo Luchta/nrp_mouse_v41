@@ -27,9 +27,12 @@ public:
                             InitMouse, Trott, StopAll} typCmd;                        // commands from shell
     std::atomic<Ccmnd> consoleCmnd;// for thread communication
 
-    int MotorP = 17;
-    int MotorI = 0;
-    int MotorD = 35;
+	// setup values
+	int Motors[13] = {00,01,02,03,10,11,12,13,20,21,22,23,24};
+	int MotorP = 17;
+	int MotorI = 0;
+	int MotorD = 35;
+
 
     //Functions
     void startThread();
@@ -44,7 +47,7 @@ public:
     void sendNL();
 
     void MotorPwrCycle();
-    void setMotorPID(int id, int val1, int val2);
+    void setMotorPID();
     void setMotorSilent(int id, int val1);
     void MotorSetup();
 protected:
