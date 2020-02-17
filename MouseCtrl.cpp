@@ -1811,10 +1811,28 @@ CSpinePos CSpine::centre()
 #if defined ROS
 CMouseRos::CMouseRos()
 {
-    msgarr.data.resize(14); //need to declare the size, else it wont work
-    pub = n.advertise<std_msgs::Float64MultiArray>("nrpmouse_servotopic", 512);
+    //msgarr.data.resize(14); //need to declare the size, else it wont work
+    //pub = n.advertise<std_msgs::Float64MultiArray>("nrpmouse_servotopic", 512);
     n.setParam("length", 50);
     //ros::Rate loop_rate(10); //run at 10Hz, not sleep time
+    LElbow_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_L_Elbow/cmd_pos", 512);
+    LShoulder_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_L_Shoulder/cmd_pos", 512);
+    RElbow_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_R_Elbow/cmd_pos", 512);
+    RShoulder_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_R_Shoulder/cmd_pos", 512);
+    LHip_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_L_Hip/cmd_pos", 512);
+    LKnee_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_L_Knee/cmd_pos", 512);
+    RHip_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_R_Hip/cmd_pos", 512);
+    RKnee_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_R_Knee/cmd_pos", 512);
+    LBodyH10_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Body10/cmd_pos", 512);
+    LBodyH1_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Body1/cmd_pos", 512);
+    LBodyH7_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Body7/cmd_pos", 512);
+
+    LTail21_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Tail21/cmd_pos", 512);
+    LTail15_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Tail15/cmd_pos", 512);
+    LTail9_pub = n.advertise<std_msgs::Float64>("/Nermo/joint_Tail9/cmd_pos", 512);
+
+    std::cout << "Publisher initalized!" << std::endl;
+
 }
 
 //starting the loop thread
@@ -1827,42 +1845,53 @@ void CMouseRos::ROSstartThread() {
 
 void CMouseRos::RosCtrl()
 {
+    int cmd;
+    bool OK = true;
+    //Amount of Waypoints generated per motion:
     int motionlength = 50;
-    int cmd = '0';
-    int state = '0';
-    //bool newArray = true;
-    clearArr(); //set everything to 90 deg, to avoid damage.
+    int boundlength = 20;
+    int situpDownTime = 80;
+    int switchingTime = 20;
+    int pushingTime = 20;
+    int initTime = 1;
 
-    while (ros::ok())
+    //get Programm starting time
+    StartTime = GetCurTime().count();
+
+    //set everything to 180 deg(neutral position) to avoid damage.
+    clearArr();
+    //print greeting message
+    Greeting();
+
+    while (OK)
     {
         cmd = messages; //just one access to messages per run - not yet atomic!!
+        //cmd = 'a';
         if (cmd != state && cmd != 0){
-            //newArray = true;
             state = cmd;
         }
-        n.param("length", motionlength, 50);
         switch (state) {
         case 'i':   //initalize pose
             dir = stop;
             std::cout << "init" << std::endl;
+            Init(initTime);
+            Publish(initTime);
             messages = 0;
-            Init(3);
-            Publish(3);
             state = 'h';
             break;
-        case 'w': //walk forward
+        case 'w': //walk forward+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             dir = Fwd;
             std::cout << "Straight ahead" << std::endl;
             Trot(motionlength);
             messages = 0;
             state = 'm';
             break;
-        case 's': //walk backward
+        case 's': //Stop Motors
             dir = Bkwd;
-            std::cout<<"Backwards"<<std::endl;
-            TrotBkw(motionlength);
+            std::cout<<"Stop Motors"<<std::endl;
+            StopAllMotors();
             messages = 0;
-            state = 'm';
+            state = 'h';
             break;
         case 'a': //walk left
             dir = left;
@@ -1878,55 +1907,164 @@ void CMouseRos::RosCtrl()
             messages = 0;
             state = 'm';
             break;
-        case 'y':   //quit programm
+        case 'b':   //Bound Gait+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            std::cout<<"Bound"<<std::endl;
+            Bound(boundlength);
+            Publish(boundlength);
+            messages = 0;
+            state = '.';
+            break;
+        case 'n':   //Bound2 Gait
+            std::cout<<"Bound2"<<std::endl;
+            Bound2(boundlength);
+            Publish(boundlength);
+            messages = 0;
+            state = '.';
+            break;
+        case 'y':   //Sitting+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             std::cout<<"Sitting"<<std::endl;
-            SitUp(80);
-            Publish(80);
+            SitUp(situpDownTime);
+            Publish(situpDownTime);
             messages = 0;
             state = 'h';
             break;
-        case 'q':   //quit programm
-            std::cout<<"Quitting"<<std::endl;
-            clearArr();
-            Publish();
-            return;
-        case 'm':   //publish motions to ros
+        case 'f':   //press both paws
+            std::cout<<"press both paws"<<std::endl;
+            PushBothHands(switchingTime);
+            Publish(switchingTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case 't':   //lift both paws
+            std::cout<<"lift both paws"<<std::endl;
+            LiftBothHands(switchingTime);
+            Publish(switchingTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case 'e':   //push left paw
+            std::cout<<"push left paw"<<std::endl;
+            ReleaseLever(pushingTime, 'l');
+            Publish(pushingTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case 'r':   //push right paw
+            std::cout<<"push right paw"<<std::endl;
+            ReleaseLever(pushingTime, 'r');
+            Publish(pushingTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case 'x':   //sit down
+            std::cout<<"sit down"<<std::endl;
+            SitDown(situpDownTime);
+            Publish(situpDownTime);
+            messages = 0;
+            state = 'h';
+            break;
+        case '+':   //increase speed+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            CommandDelay = CommandDelay + 5000;
+            std::cout<<"new Speed: "<<CommandDelay<<"\n";
+            messages = 0;
+            state = 'h';
+            break;
+        case '-':   //decrease speed
+            CommandDelay = CommandDelay - 5000;
+            std::cout<<"new Speed: "<<CommandDelay<<"\n";
+            messages = 0;
+            state = 'h';
+            break;
+        case 'm':   //publish motions to uart
             Publish(motionlength);
             break;
-        case 'h':   //idle
-            usleep(90);
-
+        case '.':   //publish motions to uart
+            Publish(boundlength);
             break;
+        case 'h':   //idle-hold
+            dir = stop;
+            usleep(90);
+            break;
+        case 'p':   //save motion data++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            StoreFile();
+            messages = 0;
+            state = 'h';
+            break;
+        case 'o':   //read motion data
+            std::cout<<"reading data"<<std::endl;
+            ReadFile();
+            messages = 0;
+            state = 'h';
+            break;
+        case 'l':   //playback motion data once
+            PlayFile();
+            messages = 0;
+            state = 'h';
+            break;
+        case ',':   //playback motion data reverse once
+            PlayFileReverse();
+            messages = 0;
+            state = 'h';
+            break;
+        case 'k':   //playback motion data continous
+            PlayFile();
+            break;
+        case 'j':   //playback motion data reverse continous
+            PlayFileReverse();
+            break;
+        case 'q':   //quit programm
+            std::cout<<"Quitting"<<std::endl;
+            StopAllMotors();
+            return;
         }
     }
 }
 
 void CMouseRos::Publish(int length)
 {
-    ros::Rate loop_rate(40); //run at 40Hz, not sleep time
+    ros::Rate loop_rate(20); //run at 20Hz, not sleep time
     for(int i=0;i<length;i++){
 
-        msgarr.data[TIMESTAMP] = TrottArray[i][TIMESTAMP];
-        msgarr.data[FORELEFT_HIP]=(TrottArray[i][FORELEFT_HIP]);
-        msgarr.data[FORELEFT_KNEE]=(TrottArray[i][FORELEFT_KNEE]);
-        msgarr.data[FORERIGHT_HIP]=(TrottArray[i][FORERIGHT_HIP]);
-        msgarr.data[FORERIGHT_KNEE]=(TrottArray[i][FORERIGHT_KNEE]);
-        msgarr.data[HINDLEFT_HIP]=(TrottArray[i][HINDLEFT_HIP]);
-        msgarr.data[HINDLEFT_KNEE]=(TrottArray[i][HINDLEFT_KNEE]);
-        msgarr.data[HINDRIGHT_HIP]=(TrottArray[i][HINDRIGHT_HIP]);
-        msgarr.data[HINDRIGHT_KNEE]=(TrottArray[i][HINDRIGHT_KNEE]);
-        msgarr.data[SPINE]=(TrottArray[i][SPINE]);
-        msgarr.data[TAIL]=(TrottArray[i][TAIL]);
-        msgarr.data[SPINE_FLEX]=(TrottArray[i][SPINE_FLEX]);
-        msgarr.data[HEAD_PAN]=(TrottArray[i][HEAD_PAN]);
-        msgarr.data[HEAD_TILT]=(TrottArray[i][HEAD_TILT]);
+        LShoulder.data=(degToRad(TrottArray[i][FORELEFT_HIP]))-1.4;
+        LElbow.data=-((degToRad(TrottArray[i][FORELEFT_KNEE])*0.4)-0.6);
+        RShoulder.data=(degToRad(TrottArray[i][FORERIGHT_HIP]))-1.4;
+        RElbow.data=-((degToRad(TrottArray[i][FORERIGHT_KNEE])*0.4)-0.6);
+        LHip.data=(degToRad(TrottArray[i][HINDLEFT_HIP]))-0.2;
+        RHip.data=(degToRad(TrottArray[i][HINDRIGHT_HIP]))-0.2;
+        LKnee.data=(-degToRad(TrottArray[i][HINDLEFT_KNEE])/2)+0.7;
+        RKnee.data=(-degToRad(TrottArray[i][HINDRIGHT_KNEE])/2)+0.7;
+        LBodyH.data=(degToRad(TrottArray[i][SPINE]))-1.309;
+        LBodyH2.data=-((degToRad(TrottArray[i][SPINE]))-1.309);
+        //LBodyH3.data=-((degToRad(TrottArray[i][SPINE]))-1.309);
 
-        //std::cout << (TrottArray[i][SPINE_FLEX]) << "\n";
+        LTail.data=(degToRad(TrottArray[i][TAIL])*0.4)-0.6;
 
-        pub.publish(msgarr);
+        LElbow_pub.publish(LElbow);
+        LShoulder_pub.publish(LShoulder);
+        RElbow_pub.publish(RElbow);
+        RShoulder_pub.publish(RShoulder);
+        LHip_pub.publish(LHip);
+        LKnee_pub.publish(LKnee);
+        RHip_pub.publish(RHip);
+        RKnee_pub.publish(RKnee);
+        LBodyH10_pub.publish(LBodyH);
+        LBodyH1_pub.publish(LBodyH2);
+        LBodyH7_pub.publish(LBodyH2);
+
+        //LTail21_pub.publish(LTail);
+        //LTail15_pub.publish(LTail);
+        //LTail9_pub.publish(LTail);
+
+
         ros::spinOnce();
         loop_rate.sleep();
+
     }
+}
+
+float CMouseRos::degToRad(double l)
+{
+    return l*halfC;
 }
 
 #endif
